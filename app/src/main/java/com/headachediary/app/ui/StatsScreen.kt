@@ -1,14 +1,16 @@
 package com.headachediary.app.ui
 
 import android.content.Intent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -22,6 +24,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,9 +35,9 @@ import com.headachediary.app.data.HeadacheType
 import com.headachediary.app.data.Symptom
 import com.headachediary.app.data.Trigger
 import com.headachediary.app.data.toKeySet
+import java.time.LocalDate
 import java.util.Locale
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -65,6 +70,7 @@ fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
         modifier.verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        Text("Статистика", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(selected = days == 30, onClick = { days = 30 }, label = { Text("30 дней") })
             FilterChip(selected = days == 90, onClick = { days = 90 }, label = { Text("90 дней") })
@@ -97,6 +103,7 @@ fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
             }
         }
 
+        PainBars(entries)
         RankCard("Частые провокаторы", topTriggers)
         RankCard("Частые симптомы", topSymptoms)
 
@@ -121,19 +128,57 @@ fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
     }
 }
 
+/** Столбики по дням за последние 30 дней: высота и цвет зависят от силы боли. */
 @Composable
-private fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
-    Card(modifier) {
-        Column(Modifier.padding(12.dp).fillMaxWidth()) {
-            Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Text(label, style = MaterialTheme.typography.labelMedium)
+private fun PainBars(entries: List<HeadacheEntry>) {
+    val today = LocalDate.now()
+    val byDay = entries.groupBy { it.startTime.toLocalDate() }
+    // null — боли не было, 0 — боль без указанной силы
+    val values: List<Int?> = (29 downTo 0).map { back ->
+        byDay[today.minusDays(back.toLong())]?.let { list -> list.mapNotNull { it.intensity }.maxOrNull() ?: 0 }
+    }
+    val emptyColor = MaterialTheme.colorScheme.surfaceVariant
+
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
+        Column(Modifier.padding(16.dp)) {
+            Text("Сила боли по дням", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Последние 30 дней",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+            Canvas(Modifier.fillMaxWidth().height(90.dp)) {
+                val gap = 4.dp.toPx()
+                val barWidth = (size.width - gap * (values.size - 1)) / values.size
+                values.forEachIndexed { i, v ->
+                    val x = i * (barWidth + gap)
+                    if (v == null) {
+                        val h = 4.dp.toPx()
+                        drawRoundRect(emptyColor, Offset(x, size.height - h), Size(barWidth, h), CornerRadius(2.dp.toPx()))
+                    } else {
+                        val h = if (v == 0) size.height * 0.3f else size.height * v / 10f
+                        drawRoundRect(
+                            painColor(v.takeIf { it > 0 }),
+                            Offset(x, size.height - h),
+                            Size(barWidth, h),
+                            CornerRadius(3.dp.toPx()),
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("30 дн. назад", style = MaterialTheme.typography.labelSmall)
+                Text("сегодня", style = MaterialTheme.typography.labelSmall)
+            }
         }
     }
 }
 
 @Composable
 private fun RankCard(title: String, items: List<Pair<String, Int>>) {
-    Card(Modifier.fillMaxWidth()) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             if (items.isEmpty()) {

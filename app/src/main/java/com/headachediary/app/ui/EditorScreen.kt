@@ -1,14 +1,22 @@
 package com.headachediary.app.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,10 +28,11 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -33,8 +42,10 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
@@ -88,7 +99,7 @@ fun EditorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Запись о боли") },
+                title = { Text("Запись о боли", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = ::saveAndClose) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
@@ -101,23 +112,24 @@ fun EditorScreen(
                 },
             )
         },
+        bottomBar = {
+            Surface(tonalElevation = 3.dp) {
+                Box(Modifier.navigationBarsPadding()) {
+                    Button(onClick = ::saveAndClose, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                        Text("Сохранить")
+                    }
+                }
+            }
+        },
     ) { padding ->
         Column(
             Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Section("Время") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(
-                        onClick = { pickDateTime(context, start) { start = it } },
-                        modifier = Modifier.weight(1f),
-                    ) { Text("Началась: ${formatDateTime(start)}") }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(
-                        onClick = { pickDateTime(context, end ?: System.currentTimeMillis()) { end = it } },
-                        modifier = Modifier.weight(1f),
-                    ) { Text(end?.let { "Закончилась: ${formatDateTime(it)}" } ?: "Закончилась: не указано") }
+            SectionCard("Время") {
+                TimeRow("Началась", formatDateTime(start)) { pickDateTime(context, start) { start = it } }
+                TimeRow("Закончилась", end?.let { formatDateTime(it) } ?: "ещё болит") {
+                    pickDateTime(context, end ?: System.currentTimeMillis()) { end = it }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { end = System.currentTimeMillis() }) { Text("Прошла сейчас") }
@@ -131,11 +143,15 @@ fun EditorScreen(
                         style = MaterialTheme.typography.bodySmall,
                     )
                 } else if (e != null) {
-                    Text("Длительность: ${formatDuration(e - start)}", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        "Длительность: ${formatDuration(e - start)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 
-            Section("Тип боли") {
+            SectionCard("Тип боли") {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     HeadacheType.entries.forEach {
                         FilterChip(selected = type == it, onClick = { type = it }, label = { Text(it.label) })
@@ -143,18 +159,47 @@ fun EditorScreen(
                 }
             }
 
-            Section("Сила боли: ${intensity?.let { "$it из 10" } ?: "не указана"}") {
+            SectionCard("Сила боли") {
+                val color = painColor(intensity)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(56.dp).background(color, CircleShape), contentAlignment = Alignment.Center) {
+                        Text(
+                            intensity?.toString() ?: "?",
+                            color = onPainColor(intensity),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                    Spacer(Modifier.width(14.dp))
+                    Column {
+                        Text(intensityLabel(intensity), style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            if (intensity == null) "Передвиньте ползунок" else "из 10",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 Slider(
                     value = (intensity ?: 5).toFloat(),
                     onValueChange = { intensity = it.roundToInt() },
                     valueRange = 1f..10f,
                     steps = 8,
+                    colors = SliderDefaults.colors(
+                        thumbColor = color,
+                        activeTrackColor = color,
+                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
                 )
             }
 
-            Section("Симптомы") {
+            SectionCard("Симптомы") {
                 SymptomGroup.entries.forEach { group ->
-                    Text(group.title, style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        group.title,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Symptom.entries.filter { it.group == group }.forEach { s ->
                             FilterChip(
@@ -167,7 +212,7 @@ fun EditorScreen(
                 }
             }
 
-            Section("Возможные провокаторы") {
+            SectionCard("Возможные провокаторы") {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Trigger.entries.forEach { t ->
                         FilterChip(
@@ -179,7 +224,7 @@ fun EditorScreen(
                 }
             }
 
-            Section("Лекарство") {
+            SectionCard("Лекарство") {
                 OutlinedTextField(
                     value = medication,
                     onValueChange = { medication = it },
@@ -199,7 +244,7 @@ fun EditorScreen(
                 }
             }
 
-            Section("Заметки") {
+            SectionCard("Заметки") {
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
@@ -207,8 +252,6 @@ fun EditorScreen(
                     minLines = 3,
                 )
             }
-
-            Button(onClick = ::saveAndClose, modifier = Modifier.fillMaxWidth()) { Text("Сохранить") }
         }
     }
 
@@ -229,9 +272,16 @@ fun EditorScreen(
 }
 
 @Composable
-private fun Section(title: String, content: @Composable () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        content()
+private fun TimeRow(label: String, value: String, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, style = MaterialTheme.typography.titleMedium)
+        }
+        Text("Изменить", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
     }
 }

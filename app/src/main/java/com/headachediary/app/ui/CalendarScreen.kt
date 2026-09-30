@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,7 +62,16 @@ fun CalendarScreen(
     val byDay = remember(entries) { entries.groupBy { it.startTime.toLocalDate() } }
     val today = LocalDate.now()
 
+    val monthPainDays = byDay.keys.count { YearMonth.from(it) == month }
+
     Column(modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Text("Календарь", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(
+            if (monthPainDays == 0) "В этом месяце дней с болью нет" else "Дней с болью в этом месяце: $monthPainDays",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -156,7 +166,7 @@ private fun DayCell(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val shape = RoundedCornerShape(10.dp)
+    val shape = CircleShape
     val hasPain = dayEntries.isNotEmpty()
     val maxIntensity = dayEntries.mapNotNull { it.intensity }.maxOrNull()
     val bg = if (hasPain) painColor(maxIntensity) else Color.Transparent

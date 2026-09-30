@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Дневник головной боли</string>
+    <string name="widget_description">Одно нажатие — записать начало боли или её окончание</string>
 </resources>

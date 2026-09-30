@@ -43,6 +43,9 @@ fun formatDuration(ms: Long): String {
     }
 }
 
+/** Приступ считается идущим, если он не закрыт и начался не более суток назад. */
+fun HeadacheEntry.isOngoing(now: Long): Boolean = endTime == null && now - startTime < DAY_MS
+
 fun timeRange(e: HeadacheEntry): String {
     val end = e.endTime ?: return "с ${formatTime(e.startTime)}"
     return "${formatTime(e.startTime)} – ${formatTime(end)} (${formatDuration(end - e.startTime)})"

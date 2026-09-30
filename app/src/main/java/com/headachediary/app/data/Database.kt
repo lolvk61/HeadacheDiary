@@ -16,6 +16,9 @@ interface EntryDao {
     @Query("SELECT * FROM entries ORDER BY startTime DESC")
     fun all(): Flow<List<HeadacheEntry>>
 
+    @Query("SELECT * FROM entries ORDER BY startTime DESC LIMIT 1")
+    suspend fun latest(): HeadacheEntry?
+
     @Insert
     suspend fun insert(entry: HeadacheEntry): Long
 
