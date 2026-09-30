@@ -11,7 +11,7 @@
 **English:** a headache and migraine diary for Android 8.0+. Download the APK from
 [Releases](../../releases/latest), open it on the phone and allow installing from this source. All data stays on the phone.
 
-Kotlin + Jetpack Compose + Room. Данные хранятся только на телефоне.
+Сделано на Kotlin, Jetpack Compose и Room.
 
 ## Сборка
 1. Установите Android Studio (в комплекте SDK и JDK).
