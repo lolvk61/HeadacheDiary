@@ -11,3 +11,4 @@ keystore.properties
 app/release/
 *.apk
 *.aab
+.kotlin/
