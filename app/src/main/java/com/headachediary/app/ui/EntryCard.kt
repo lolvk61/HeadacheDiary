@@ -18,8 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
 import com.headachediary.app.data.MedHelp
@@ -27,10 +30,11 @@ import com.headachediary.app.data.symptomLabels
 
 @Composable
 fun EntryCard(entry: HeadacheEntry, onClick: () -> Unit) {
+    val context = LocalContext.current
     val type = HeadacheType.fromKey(entry.type)
     val timeText = entry.endTime
         ?.let { "${formatTime(entry.startTime)} – ${formatTime(it)}" }
-        ?: "с ${formatTime(entry.startTime)}"
+        ?: stringResource(R.string.entry_since, formatTime(entry.startTime))
 
     Card(
         onClick = onClick,
@@ -59,7 +63,7 @@ fun EntryCard(entry: HeadacheEntry, onClick: () -> Unit) {
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TypeChip(type)
-                    val duration = entry.endTime?.let { formatDuration(it - entry.startTime) }
+                    val duration = entry.endTime?.let { formatDuration(context, it - entry.startTime) }
                     if (duration != null) {
                         Text(
                             duration,
@@ -68,20 +72,21 @@ fun EntryCard(entry: HeadacheEntry, onClick: () -> Unit) {
                         )
                     }
                 }
-                val symptoms = entry.symptoms.symptomLabels()
+                val symptoms = entry.symptoms.symptomLabels(context)
                 if (symptoms.isNotEmpty()) {
                     val shown = symptoms.take(3).joinToString(", ")
                     val more = symptoms.size - 3
                     Text(
-                        if (more > 0) "$shown и ещё $more" else shown,
+                        if (more > 0) stringResource(R.string.entry_and_more, shown, more) else shown,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 2,
                     )
                 }
                 if (entry.medication.isNotBlank()) {
                     val help = MedHelp.entries.firstOrNull { it.name == entry.medicationHelped }
+                    val helpText = help?.let { " · " + stringResource(it.labelRes).lowercase() }.orEmpty()
                     Text(
-                        "Лекарство: ${entry.medication}" + (help?.let { " · ${it.label.lowercase()}" } ?: ""),
+                        stringResource(R.string.entry_medication, entry.medication) + helpText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -36,18 +35,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-
-private val monthFmt = DateTimeFormatter.ofPattern("LLLL yyyy", ruLocale)
-private val weekDays = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+import java.time.format.TextStyle as DateTextStyle
 
 @Composable
 fun CalendarScreen(
@@ -56,18 +57,27 @@ fun CalendarScreen(
     onAddForDate: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+    val locale = context.appLocale()
     var offset by rememberSaveable { mutableIntStateOf(0) }
     var selectedEpochDay by rememberSaveable { mutableStateOf<Long?>(LocalDate.now().toEpochDay()) }
     val month = YearMonth.now().plusMonths(offset.toLong())
     val byDay = remember(entries) { entries.groupBy { it.startTime.toLocalDate() } }
     val today = LocalDate.now()
-
     val monthPainDays = byDay.keys.count { YearMonth.from(it) == month }
 
     Column(modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Text("Календарь", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(
-            if (monthPainDays == 0) "В этом месяце дней с болью нет" else "Дней с болью в этом месяце: $monthPainDays",
+            stringResource(R.string.cal_title),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            if (monthPainDays == 0) {
+                stringResource(R.string.cal_month_none)
+            } else {
+                stringResource(R.string.cal_month_count, monthPainDays)
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -78,21 +88,21 @@ fun CalendarScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = { offset-- }) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Прошлый месяц")
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cal_prev))
             }
             Text(
-                month.format(monthFmt).replaceFirstChar { it.uppercase() },
+                month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)).replaceFirstChar { it.uppercase() },
                 style = MaterialTheme.typography.titleLarge,
             )
             IconButton(onClick = { offset++ }, enabled = offset < 0) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Следующий месяц")
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cal_next))
             }
         }
 
         Row(Modifier.fillMaxWidth()) {
-            weekDays.forEach {
+            DayOfWeek.values().forEach {
                 Text(
-                    it,
+                    it.getDisplayName(DateTextStyle.SHORT, locale),
                     Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelMedium,
@@ -130,20 +140,20 @@ fun CalendarScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            LegendDot(painColor(2), "слабая")
-            LegendDot(painColor(5), "средняя")
-            LegendDot(painColor(8), "сильная")
-            Text("М — мигрень", style = MaterialTheme.typography.labelSmall)
+            LegendDot(painColor(2), stringResource(R.string.legend_weak))
+            LegendDot(painColor(5), stringResource(R.string.legend_medium))
+            LegendDot(painColor(8), stringResource(R.string.legend_strong))
+            Text(stringResource(R.string.legend_migraine), style = MaterialTheme.typography.labelSmall)
         }
 
         val selected = selectedEpochDay?.let { LocalDate.ofEpochDay(it) }
         if (selected != null) {
-            Text(formatDayHeader(selected), style = MaterialTheme.typography.titleMedium)
+            Text(formatDayHeader(context, selected), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             val list = byDay[selected].orEmpty()
             if (list.isEmpty()) {
                 Text(
-                    "В этот день боли не отмечено.",
+                    stringResource(R.string.cal_no_pain),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -152,7 +162,7 @@ fun CalendarScreen(
                 list.forEach { EntryCard(it, onClick = { onOpen(it) }) }
             }
             Spacer(Modifier.height(12.dp))
-            Button(onClick = { onAddForDate(selected) }) { Text("Добавить запись за этот день") }
+            Button(onClick = { onAddForDate(selected) }) { Text(stringResource(R.string.cal_add_for_day)) }
         }
     }
 }
@@ -182,7 +192,7 @@ private fun DayCell(
     Box(m.clickable(onClick = onClick), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(day.toString(), color = fg, style = MaterialTheme.typography.bodyMedium)
-            if (hasMigraine) Text("М", color = fg, fontSize = 10.sp)
+            if (hasMigraine) Text(stringResource(R.string.cal_migraine_letter), color = fg, fontSize = 10.sp)
         }
     }
 }

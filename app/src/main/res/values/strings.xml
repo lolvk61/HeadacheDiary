@@ -1,4 +1,224 @@
 <resources>
-    <string name="app_name">Дневник головной боли</string>
-    <string name="widget_description">Одно нажатие — записать начало боли или её окончание</string>
+    <string name="app_name">Headache Diary</string>
+    <string name="widget_description">One tap to log the start or the end of a headache</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+
+    <!-- Tabs -->
+    <string name="tab_journal">Journal</string>
+    <string name="tab_calendar">Calendar</string>
+    <string name="tab_stats">Statistics</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Headache types -->
+    <string name="type_migraine">Migraine</string>
+    <string name="type_tension">Regular headache</string>
+    <string name="type_unknown">Type not set</string>
+
+    <!-- Symptom groups -->
+    <string name="group_migraine">More typical of migraine</string>
+    <string name="group_tension">More typical of a regular headache</string>
+    <string name="group_common">Other</string>
+
+    <!-- Symptoms -->
+    <string name="sym_pulsating">Throbbing pain</string>
+    <string name="sym_one_sided">Pain on one side</string>
+    <string name="sym_nausea">Nausea</string>
+    <string name="sym_vomiting">Vomiting</string>
+    <string name="sym_photophobia">Sensitivity to light</string>
+    <string name="sym_phonophobia">Sensitivity to sound</string>
+    <string name="sym_smell">Sensitivity to smells</string>
+    <string name="sym_aura">Aura (flashes, spots, numbness)</string>
+    <string name="sym_worse_movement">Worse with movement</string>
+    <string name="sym_pressing">Pressing, band around the head</string>
+    <string name="sym_both_sides">Pain on both sides</string>
+    <string name="sym_mild">Mild or moderate</string>
+    <string name="sym_neck_tension">Neck and shoulder tension</string>
+    <string name="sym_not_worse_movement">Not worse with movement</string>
+    <string name="sym_dizziness">Dizziness</string>
+    <string name="sym_fatigue">Fatigue</string>
+    <string name="sym_irritability">Irritability</string>
+    <string name="sym_concentration">Trouble concentrating</string>
+    <string name="sym_eye_pain">Pain behind the eye</string>
+
+    <!-- Triggers -->
+    <string name="trg_sleep">Too little or too much sleep</string>
+    <string name="trg_stress">Stress</string>
+    <string name="trg_alcohol">Alcohol</string>
+    <string name="trg_caffeine">Caffeine</string>
+    <string name="trg_skipped_meal">Skipped meal</string>
+    <string name="trg_dehydration">Not enough water</string>
+    <string name="trg_weather">Weather</string>
+    <string name="trg_menstruation">Menstruation</string>
+    <string name="trg_bright_light">Bright light</string>
+    <string name="trg_screen">Long screen time</string>
+    <string name="trg_smells">Strong smells</string>
+    <string name="trg_food">Particular food</string>
+    <string name="trg_physical">Physical exertion</string>
+
+    <!-- Medication effect -->
+    <string name="med_yes">It helped</string>
+    <string name="med_partly">Partly</string>
+    <string name="med_no">It did not help</string>
+
+    <!-- Intensity -->
+    <string name="intensity_none">Intensity not set</string>
+    <string name="intensity_weak">Mild</string>
+    <string name="intensity_medium">Moderate</string>
+    <string name="intensity_strong">Severe</string>
+    <string name="intensity_very_strong">Very severe</string>
+    <string name="intensity_hint">Move the slider</string>
+    <string name="intensity_of_10">out of 10</string>
+
+    <!-- Durations -->
+    <string name="duration_min">%1$d min</string>
+    <string name="duration_h">%1$d h</string>
+    <string name="duration_h_min">%1$d h %2$d min</string>
+
+    <!-- Journal -->
+    <string name="journal_greeting">How are you feeling?</string>
+    <string name="hero_pain_title">My head hurts</string>
+    <string name="hero_pain_subtitle">Tap to log the time right now</string>
+    <string name="hero_ongoing_title">Attack in progress</string>
+    <string name="hero_ongoing_subtitle">Since %1$s · %2$s so far</string>
+    <string name="hero_end">Pain is over</string>
+    <string name="hero_details">Add details</string>
+    <string name="tile_pain_days_30">Pain days, 30 d.</string>
+    <string name="tile_migraine_days">Migraine days</string>
+    <string name="tile_pain_free_days">Days pain-free</string>
+    <string name="journal_history">History</string>
+    <string name="week_title">Last 7 days</string>
+    <string name="empty_title">No entries yet</string>
+    <string name="empty_body">When a headache starts, tap the red button above and the time is saved automatically. History, statistics and the calendar will appear here.</string>
+
+    <!-- Entry card -->
+    <string name="entry_since">from %1$s</string>
+    <string name="entry_and_more">%1$s and %2$d more</string>
+    <string name="entry_medication">Medication: %1$s</string>
+
+    <!-- Editor -->
+    <string name="editor_title">Headache entry</string>
+    <string name="section_time">Time</string>
+    <string name="time_started">Started</string>
+    <string name="time_ended">Ended</string>
+    <string name="time_still_hurts">still hurts</string>
+    <string name="time_change">Change</string>
+    <string name="btn_ended_now">Ended just now</string>
+    <string name="btn_still_hurts">Still hurts</string>
+    <string name="err_end_before_start">The end time is before the start and will not be saved.</string>
+    <string name="duration_label">Duration: %1$s</string>
+    <string name="section_type">Type of headache</string>
+    <string name="section_intensity">Intensity</string>
+    <string name="section_symptoms">Symptoms</string>
+    <string name="section_triggers">Possible triggers</string>
+    <string name="section_medication">Medication</string>
+    <string name="med_hint">What you took and the dose</string>
+    <string name="section_notes">Notes</string>
+    <string name="delete_title">Delete this entry?</string>
+    <string name="delete_text">This cannot be undone.</string>
+
+    <!-- Calendar -->
+    <string name="cal_title">Calendar</string>
+    <string name="cal_month_none">No headache days this month</string>
+    <string name="cal_month_count">Headache days this month: %1$d</string>
+    <string name="cal_prev">Previous month</string>
+    <string name="cal_next">Next month</string>
+    <string name="legend_weak">mild</string>
+    <string name="legend_medium">moderate</string>
+    <string name="legend_strong">severe</string>
+    <string name="legend_migraine">M — migraine</string>
+    <string name="cal_migraine_letter">M</string>
+    <string name="cal_no_pain">No headache logged on this day.</string>
+    <string name="cal_add_for_day">Add an entry for this day</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Statistics</string>
+    <string name="period_30">30 days</string>
+    <string name="period_90">90 days</string>
+    <string name="period_year">Year</string>
+    <string name="period_all">All time</string>
+    <string name="stat_pain_days">Headache days</string>
+    <string name="stat_migraine_days">Migraine days</string>
+    <string name="stat_tension_days">Regular headache days</string>
+    <string name="stat_avg_intensity">Average intensity</string>
+    <string name="stat_avg_duration">Average duration</string>
+    <string name="stat_med_days">Days with medication</string>
+    <string name="warn_med_overuse">Pain medication was taken on 10 or more days this month. Frequent use can itself make headaches worse, so it is worth discussing with a doctor.</string>
+    <string name="bars_title">Intensity by day</string>
+    <string name="bars_subtitle">Last 30 days</string>
+    <string name="bars_30_ago">30 days ago</string>
+    <string name="bars_today">today</string>
+    <string name="rank_triggers">Frequent triggers</string>
+    <string name="rank_symptoms">Frequent symptoms</string>
+    <string name="rank_no_data">No data for the selected period yet.</string>
+    <string name="btn_doctor_report">Report for your doctor</string>
+    <string name="disclaimer">This app keeps a diary and does not replace a medical consultation.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_language">Language</string>
+    <string name="lang_system">System default</string>
+    <string name="settings_data">Data</string>
+    <string name="action_doctor_report">Report for your doctor (PDF)</string>
+    <string name="action_doctor_report_desc">A clear summary and a list of attacks for the chosen period, ready to show or send</string>
+    <string name="action_backup">Save a backup</string>
+    <string name="action_backup_desc">A file with all entries, to keep safe or move to another phone</string>
+    <string name="action_restore">Restore from a backup</string>
+    <string name="action_restore_desc">Adds entries from a backup file. Entries you already have are not duplicated</string>
+    <string name="backup_saved">Backup saved</string>
+    <string name="backup_failed">Could not save the file</string>
+    <string name="import_done">Entries added: %1$d, duplicates skipped: %2$d</string>
+    <string name="import_failed">Could not read the file. Choose a backup created by this app.</string>
+    <string name="settings_about">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_privacy">All data is stored only on this phone. Nothing is sent anywhere unless you share a report or a backup yourself.</string>
+
+    <!-- Doctor report -->
+    <string name="report_dialog_title">Report for your doctor</string>
+    <string name="report_dialog_text">Choose the period to include in the PDF:</string>
+    <string name="report_create">Create</string>
+    <string name="report_creating">Creating…</string>
+    <string name="report_empty">There are no entries for the selected period</string>
+    <string name="report_failed">Could not create the report</string>
+    <string name="report_share">Send report</string>
+    <string name="report_title">Headache diary</string>
+    <string name="report_period">Period: %1$s – %2$s (%3$d days)</string>
+    <string name="report_generated">Prepared on %1$s</string>
+    <string name="report_summary">Summary</string>
+    <string name="report_pain_days">Days with headache: %1$d of %2$d</string>
+    <string name="report_attacks">Number of attacks: %1$d</string>
+    <string name="report_migraine_days">Days with migraine: %1$d</string>
+    <string name="report_tension_days">Days with a regular headache: %1$d</string>
+    <string name="report_avg_intensity">Average intensity: %1$s out of 10</string>
+    <string name="report_avg_duration">Average duration of an attack: %1$s</string>
+    <string name="report_med_days">Days with medication taken: %1$d</string>
+    <string name="report_frequent_triggers">Most frequent triggers: %1$s</string>
+    <string name="report_frequent_symptoms">Most frequent symptoms: %1$s</string>
+    <string name="report_med_note">Note: pain medication was taken on 10 or more days in the last 30 days.</string>
+    <string name="report_episodes">Attacks in chronological order</string>
+    <string name="report_end_unknown">from %1$s, end time not recorded</string>
+    <string name="report_intensity">intensity %1$d out of 10 (%2$s)</string>
+    <string name="report_intensity_unknown">intensity not recorded</string>
+    <string name="report_symptoms">Symptoms: %1$s</string>
+    <string name="report_triggers">Possible triggers: %1$s</string>
+    <string name="report_medication">Medication: %1$s</string>
+    <string name="report_notes">Notes: %1$s</string>
+    <string name="report_page">Page %1$d</string>
+    <string name="report_disclaimer">This report is compiled from the patient\'s own diary entries and is not a medical opinion.</string>
+
+    <!-- Widget -->
+    <string name="widget_status_ongoing">Attack since %1$s</string>
+    <string name="widget_status_last">Last time: %1$s</string>
+    <string name="widget_status_hint">Tap when a headache starts</string>
+    <string name="toast_started">Logged: headache from %1$s</string>
+    <string name="toast_ended">Pain is over. It lasted %1$s</string>
 </resources>

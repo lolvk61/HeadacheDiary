@@ -1,7 +1,10 @@
 package com.headachediary.app.data
 
+import android.content.Context
+import androidx.annotation.StringRes
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.headachediary.app.R
 
 /**
  * Одна запись о приступе боли. startTime ставится автоматически в момент нажатия кнопки.
@@ -21,74 +24,79 @@ data class HeadacheEntry(
     val notes: String = "",
 )
 
-enum class HeadacheType(val label: String) {
-    MIGRAINE("Мигрень"),
-    TENSION("Обычная головная боль"),
-    UNKNOWN("Тип не указан");
+enum class HeadacheType(@StringRes val labelRes: Int) {
+    MIGRAINE(R.string.type_migraine),
+    TENSION(R.string.type_tension),
+    UNKNOWN(R.string.type_unknown);
 
     companion object {
         fun fromKey(key: String): HeadacheType = entries.firstOrNull { it.name == key } ?: UNKNOWN
     }
 }
 
-enum class SymptomGroup(val title: String) {
-    MIGRAINE("Чаще при мигрени"),
-    TENSION("Чаще при обычной головной боли"),
-    COMMON("Другое"),
+enum class SymptomGroup(@StringRes val titleRes: Int) {
+    MIGRAINE(R.string.group_migraine),
+    TENSION(R.string.group_tension),
+    COMMON(R.string.group_common),
 }
 
-enum class Symptom(val label: String, val group: SymptomGroup) {
-    PULSATING("Пульсирующая боль", SymptomGroup.MIGRAINE),
-    ONE_SIDED("Боль с одной стороны", SymptomGroup.MIGRAINE),
-    NAUSEA("Тошнота", SymptomGroup.MIGRAINE),
-    VOMITING("Рвота", SymptomGroup.MIGRAINE),
-    PHOTOPHOBIA("Боязнь света", SymptomGroup.MIGRAINE),
-    PHONOPHOBIA("Боязнь звуков", SymptomGroup.MIGRAINE),
-    SMELL_SENSITIVITY("Чувствительность к запахам", SymptomGroup.MIGRAINE),
-    AURA("Аура (мерцание, пятна, онемение)", SymptomGroup.MIGRAINE),
-    WORSE_MOVEMENT("Усиливается от движения", SymptomGroup.MIGRAINE),
+enum class Symptom(@StringRes val labelRes: Int, val group: SymptomGroup) {
+    PULSATING(R.string.sym_pulsating, SymptomGroup.MIGRAINE),
+    ONE_SIDED(R.string.sym_one_sided, SymptomGroup.MIGRAINE),
+    NAUSEA(R.string.sym_nausea, SymptomGroup.MIGRAINE),
+    VOMITING(R.string.sym_vomiting, SymptomGroup.MIGRAINE),
+    PHOTOPHOBIA(R.string.sym_photophobia, SymptomGroup.MIGRAINE),
+    PHONOPHOBIA(R.string.sym_phonophobia, SymptomGroup.MIGRAINE),
+    SMELL_SENSITIVITY(R.string.sym_smell, SymptomGroup.MIGRAINE),
+    AURA(R.string.sym_aura, SymptomGroup.MIGRAINE),
+    WORSE_MOVEMENT(R.string.sym_worse_movement, SymptomGroup.MIGRAINE),
 
-    PRESSING("Давящая, «обруч» на голове", SymptomGroup.TENSION),
-    BOTH_SIDES("Боль с обеих сторон", SymptomGroup.TENSION),
-    MILD("Лёгкая или умеренная", SymptomGroup.TENSION),
-    NECK_TENSION("Напряжение шеи и плеч", SymptomGroup.TENSION),
-    NOT_WORSE_MOVEMENT("Не усиливается от движения", SymptomGroup.TENSION),
+    PRESSING(R.string.sym_pressing, SymptomGroup.TENSION),
+    BOTH_SIDES(R.string.sym_both_sides, SymptomGroup.TENSION),
+    MILD(R.string.sym_mild, SymptomGroup.TENSION),
+    NECK_TENSION(R.string.sym_neck_tension, SymptomGroup.TENSION),
+    NOT_WORSE_MOVEMENT(R.string.sym_not_worse_movement, SymptomGroup.TENSION),
 
-    DIZZINESS("Головокружение", SymptomGroup.COMMON),
-    FATIGUE("Усталость, разбитость", SymptomGroup.COMMON),
-    IRRITABILITY("Раздражительность", SymptomGroup.COMMON),
-    CONCENTRATION("Трудно сосредоточиться", SymptomGroup.COMMON),
-    EYE_PAIN("Боль за глазом", SymptomGroup.COMMON),
+    DIZZINESS(R.string.sym_dizziness, SymptomGroup.COMMON),
+    FATIGUE(R.string.sym_fatigue, SymptomGroup.COMMON),
+    IRRITABILITY(R.string.sym_irritability, SymptomGroup.COMMON),
+    CONCENTRATION(R.string.sym_concentration, SymptomGroup.COMMON),
+    EYE_PAIN(R.string.sym_eye_pain, SymptomGroup.COMMON),
 }
 
-enum class Trigger(val label: String) {
-    SLEEP("Недосып или пересып"),
-    STRESS("Стресс"),
-    ALCOHOL("Алкоголь"),
-    CAFFEINE("Кофеин"),
-    SKIPPED_MEAL("Пропуск еды"),
-    DEHYDRATION("Мало воды"),
-    WEATHER("Погода"),
-    MENSTRUATION("Менструация"),
-    BRIGHT_LIGHT("Яркий свет"),
-    SCREEN("Долго за экраном"),
-    SMELLS("Резкие запахи"),
-    FOOD("Определённая еда"),
-    PHYSICAL("Физическая нагрузка"),
+enum class Trigger(@StringRes val labelRes: Int) {
+    SLEEP(R.string.trg_sleep),
+    STRESS(R.string.trg_stress),
+    ALCOHOL(R.string.trg_alcohol),
+    CAFFEINE(R.string.trg_caffeine),
+    SKIPPED_MEAL(R.string.trg_skipped_meal),
+    DEHYDRATION(R.string.trg_dehydration),
+    WEATHER(R.string.trg_weather),
+    MENSTRUATION(R.string.trg_menstruation),
+    BRIGHT_LIGHT(R.string.trg_bright_light),
+    SCREEN(R.string.trg_screen),
+    SMELLS(R.string.trg_smells),
+    FOOD(R.string.trg_food),
+    PHYSICAL(R.string.trg_physical),
 }
 
-enum class MedHelp(val label: String) {
-    YES("Помогло"),
-    PARTLY("Частично"),
-    NO("Не помогло"),
+enum class MedHelp(@StringRes val labelRes: Int) {
+    YES(R.string.med_yes),
+    PARTLY(R.string.med_partly),
+    NO(R.string.med_no),
 }
 
 fun String.toKeySet(): Set<String> = split(",").filter { it.isNotBlank() }.toSet()
 
 fun Set<String>.toggle(key: String): Set<String> = if (key in this) this - key else this + key
 
-fun String.symptomLabels(): List<String> =
-    toKeySet().mapNotNull { k -> Symptom.entries.firstOrNull { it.name == k }?.label }
+/** Названия симптомов на языке приложения, в порядке объявления. */
+fun String.symptomLabels(context: Context): List<String> {
+    val keys = toKeySet()
+    return Symptom.entries.filter { it.name in keys }.map { context.getString(it.labelRes) }
+}
 
-fun String.triggerLabels(): List<String> =
-    toKeySet().mapNotNull { k -> Trigger.entries.firstOrNull { it.name == k }?.label }
+fun String.triggerLabels(context: Context): List<String> {
+    val keys = toKeySet()
+    return Trigger.entries.filter { it.name in keys }.map { context.getString(it.labelRes) }
+}

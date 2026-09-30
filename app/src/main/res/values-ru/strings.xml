@@ -1,0 +1,224 @@
+<resources>
+    <string name="app_name">Дневник головной боли</string>
+    <string name="widget_description">Одно нажатие — записать начало боли или её окончание</string>
+
+    <!-- Common -->
+    <string name="back">Назад</string>
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отмена</string>
+    <string name="save">Сохранить</string>
+
+    <!-- Tabs -->
+    <string name="tab_journal">Журнал</string>
+    <string name="tab_calendar">Календарь</string>
+    <string name="tab_stats">Статистика</string>
+    <string name="tab_settings">Настройки</string>
+
+    <!-- Headache types -->
+    <string name="type_migraine">Мигрень</string>
+    <string name="type_tension">Обычная головная боль</string>
+    <string name="type_unknown">Тип не указан</string>
+
+    <!-- Symptom groups -->
+    <string name="group_migraine">Чаще при мигрени</string>
+    <string name="group_tension">Чаще при обычной головной боли</string>
+    <string name="group_common">Другое</string>
+
+    <!-- Symptoms -->
+    <string name="sym_pulsating">Пульсирующая боль</string>
+    <string name="sym_one_sided">Боль с одной стороны</string>
+    <string name="sym_nausea">Тошнота</string>
+    <string name="sym_vomiting">Рвота</string>
+    <string name="sym_photophobia">Боязнь света</string>
+    <string name="sym_phonophobia">Боязнь звуков</string>
+    <string name="sym_smell">Чувствительность к запахам</string>
+    <string name="sym_aura">Аура (мерцание, пятна, онемение)</string>
+    <string name="sym_worse_movement">Усиливается от движения</string>
+    <string name="sym_pressing">Давящая, «обруч» на голове</string>
+    <string name="sym_both_sides">Боль с обеих сторон</string>
+    <string name="sym_mild">Лёгкая или умеренная</string>
+    <string name="sym_neck_tension">Напряжение шеи и плеч</string>
+    <string name="sym_not_worse_movement">Не усиливается от движения</string>
+    <string name="sym_dizziness">Головокружение</string>
+    <string name="sym_fatigue">Усталость, разбитость</string>
+    <string name="sym_irritability">Раздражительность</string>
+    <string name="sym_concentration">Трудно сосредоточиться</string>
+    <string name="sym_eye_pain">Боль за глазом</string>
+
+    <!-- Triggers -->
+    <string name="trg_sleep">Недосып или пересып</string>
+    <string name="trg_stress">Стресс</string>
+    <string name="trg_alcohol">Алкоголь</string>
+    <string name="trg_caffeine">Кофеин</string>
+    <string name="trg_skipped_meal">Пропуск еды</string>
+    <string name="trg_dehydration">Мало воды</string>
+    <string name="trg_weather">Погода</string>
+    <string name="trg_menstruation">Менструация</string>
+    <string name="trg_bright_light">Яркий свет</string>
+    <string name="trg_screen">Долго за экраном</string>
+    <string name="trg_smells">Резкие запахи</string>
+    <string name="trg_food">Определённая еда</string>
+    <string name="trg_physical">Физическая нагрузка</string>
+
+    <!-- Medication effect -->
+    <string name="med_yes">Помогло</string>
+    <string name="med_partly">Частично</string>
+    <string name="med_no">Не помогло</string>
+
+    <!-- Intensity -->
+    <string name="intensity_none">Сила не указана</string>
+    <string name="intensity_weak">Слабая</string>
+    <string name="intensity_medium">Средняя</string>
+    <string name="intensity_strong">Сильная</string>
+    <string name="intensity_very_strong">Очень сильная</string>
+    <string name="intensity_hint">Передвиньте ползунок</string>
+    <string name="intensity_of_10">из 10</string>
+
+    <!-- Durations -->
+    <string name="duration_min">%1$d мин</string>
+    <string name="duration_h">%1$d ч</string>
+    <string name="duration_h_min">%1$d ч %2$d мин</string>
+
+    <!-- Journal -->
+    <string name="journal_greeting">Как вы себя чувствуете?</string>
+    <string name="hero_pain_title">Болит голова</string>
+    <string name="hero_pain_subtitle">Нажмите — время запишется сразу</string>
+    <string name="hero_ongoing_title">Приступ идёт</string>
+    <string name="hero_ongoing_subtitle">С %1$s · уже %2$s</string>
+    <string name="hero_end">Боль прошла</string>
+    <string name="hero_details">Добавить детали</string>
+    <string name="tile_pain_days_30">Дней боли за 30 дн.</string>
+    <string name="tile_migraine_days">Дней мигрени</string>
+    <string name="tile_pain_free_days">Дней без боли</string>
+    <string name="journal_history">История</string>
+    <string name="week_title">Последние 7 дней</string>
+    <string name="empty_title">Пока нет записей</string>
+    <string name="empty_body">Когда начнётся боль, нажмите красную кнопку выше — время сохранится автоматически. Здесь появятся история, статистика и календарь.</string>
+
+    <!-- Entry card -->
+    <string name="entry_since">с %1$s</string>
+    <string name="entry_and_more">%1$s и ещё %2$d</string>
+    <string name="entry_medication">Лекарство: %1$s</string>
+
+    <!-- Editor -->
+    <string name="editor_title">Запись о боли</string>
+    <string name="section_time">Время</string>
+    <string name="time_started">Началась</string>
+    <string name="time_ended">Закончилась</string>
+    <string name="time_still_hurts">ещё болит</string>
+    <string name="time_change">Изменить</string>
+    <string name="btn_ended_now">Прошла сейчас</string>
+    <string name="btn_still_hurts">Ещё болит</string>
+    <string name="err_end_before_start">Время окончания раньше начала — оно не будет сохранено.</string>
+    <string name="duration_label">Длительность: %1$s</string>
+    <string name="section_type">Тип боли</string>
+    <string name="section_intensity">Сила боли</string>
+    <string name="section_symptoms">Симптомы</string>
+    <string name="section_triggers">Возможные провокаторы</string>
+    <string name="section_medication">Лекарство</string>
+    <string name="med_hint">Что принимали и в какой дозе</string>
+    <string name="section_notes">Заметки</string>
+    <string name="delete_title">Удалить запись?</string>
+    <string name="delete_text">Это действие нельзя отменить.</string>
+
+    <!-- Calendar -->
+    <string name="cal_title">Календарь</string>
+    <string name="cal_month_none">В этом месяце дней с болью нет</string>
+    <string name="cal_month_count">Дней с болью в этом месяце: %1$d</string>
+    <string name="cal_prev">Прошлый месяц</string>
+    <string name="cal_next">Следующий месяц</string>
+    <string name="legend_weak">слабая</string>
+    <string name="legend_medium">средняя</string>
+    <string name="legend_strong">сильная</string>
+    <string name="legend_migraine">М — мигрень</string>
+    <string name="cal_migraine_letter">М</string>
+    <string name="cal_no_pain">В этот день боли не отмечено.</string>
+    <string name="cal_add_for_day">Добавить запись за этот день</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Статистика</string>
+    <string name="period_30">30 дней</string>
+    <string name="period_90">90 дней</string>
+    <string name="period_year">Год</string>
+    <string name="period_all">Всё время</string>
+    <string name="stat_pain_days">Дней с болью</string>
+    <string name="stat_migraine_days">Дней мигрени</string>
+    <string name="stat_tension_days">Обычная боль</string>
+    <string name="stat_avg_intensity">Средняя сила</string>
+    <string name="stat_avg_duration">Средняя длительность</string>
+    <string name="stat_med_days">Дней с лекарством</string>
+    <string name="warn_med_overuse">Обезболивающие принимались 10 и более дней за месяц. Частый приём лекарств сам может усиливать головную боль — стоит обсудить это с врачом.</string>
+    <string name="bars_title">Сила боли по дням</string>
+    <string name="bars_subtitle">Последние 30 дней</string>
+    <string name="bars_30_ago">30 дн. назад</string>
+    <string name="bars_today">сегодня</string>
+    <string name="rank_triggers">Частые провокаторы</string>
+    <string name="rank_symptoms">Частые симптомы</string>
+    <string name="rank_no_data">Пока нет данных за выбранный период.</string>
+    <string name="btn_doctor_report">Отчёт для врача</string>
+    <string name="disclaimer">Приложение ведёт дневник и не заменяет консультацию врача.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_appearance">Оформление</string>
+    <string name="settings_theme">Тема</string>
+    <string name="theme_system">Как в системе</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="settings_language">Язык</string>
+    <string name="lang_system">Как в системе</string>
+    <string name="settings_data">Данные</string>
+    <string name="action_doctor_report">Отчёт для врача (PDF)</string>
+    <string name="action_doctor_report_desc">Понятная сводка и список приступов за выбранный период — можно показать или отправить врачу</string>
+    <string name="action_backup">Сохранить резервную копию</string>
+    <string name="action_backup_desc">Файл со всеми записями: чтобы сохранить на память или перенести на другой телефон</string>
+    <string name="action_restore">Загрузить из резервной копии</string>
+    <string name="action_restore_desc">Добавит записи из файла. Те, что у вас уже есть, не задвоятся</string>
+    <string name="backup_saved">Резервная копия сохранена</string>
+    <string name="backup_failed">Не удалось сохранить файл</string>
+    <string name="import_done">Добавлено записей: %1$d, пропущено дублей: %2$d</string>
+    <string name="import_failed">Не удалось прочитать файл. Выберите резервную копию, созданную этим приложением.</string>
+    <string name="settings_about">О приложении</string>
+    <string name="about_version">Версия %1$s</string>
+    <string name="about_privacy">Все данные хранятся только на этом телефоне. Ничего никуда не отправляется, пока вы сами не поделитесь отчётом или резервной копией.</string>
+
+    <!-- Doctor report -->
+    <string name="report_dialog_title">Отчёт для врача</string>
+    <string name="report_dialog_text">За какой период включить записи в PDF?</string>
+    <string name="report_create">Создать</string>
+    <string name="report_creating">Создаю…</string>
+    <string name="report_empty">За выбранный период нет записей</string>
+    <string name="report_failed">Не удалось создать отчёт</string>
+    <string name="report_share">Отправить отчёт</string>
+    <string name="report_title">Дневник головной боли</string>
+    <string name="report_period">Период: %1$s – %2$s (%3$d дн.)</string>
+    <string name="report_generated">Сформировано: %1$s</string>
+    <string name="report_summary">Кратко</string>
+    <string name="report_pain_days">Дней с головной болью: %1$d из %2$d</string>
+    <string name="report_attacks">Всего приступов: %1$d</string>
+    <string name="report_migraine_days">Дней с мигренью: %1$d</string>
+    <string name="report_tension_days">Дней с обычной головной болью: %1$d</string>
+    <string name="report_avg_intensity">Средняя сила боли: %1$s из 10</string>
+    <string name="report_avg_duration">Средняя длительность приступа: %1$s</string>
+    <string name="report_med_days">Дней с приёмом лекарств: %1$d</string>
+    <string name="report_frequent_triggers">Частые провокаторы: %1$s</string>
+    <string name="report_frequent_symptoms">Частые симптомы: %1$s</string>
+    <string name="report_med_note">Обратите внимание: обезболивающие принимались 10 и более дней за последние 30 дней.</string>
+    <string name="report_episodes">Приступы по датам</string>
+    <string name="report_end_unknown">с %1$s, время окончания не указано</string>
+    <string name="report_intensity">сила боли %1$d из 10 (%2$s)</string>
+    <string name="report_intensity_unknown">сила боли не указана</string>
+    <string name="report_symptoms">Симптомы: %1$s</string>
+    <string name="report_triggers">Возможные провокаторы: %1$s</string>
+    <string name="report_medication">Лекарство: %1$s</string>
+    <string name="report_notes">Заметки: %1$s</string>
+    <string name="report_page">Стр. %1$d</string>
+    <string name="report_disclaimer">Отчёт составлен по записям самого пациента и не является медицинским заключением.</string>
+
+    <!-- Widget -->
+    <string name="widget_status_ongoing">Приступ с %1$s</string>
+    <string name="widget_status_last">Последний раз: %1$s</string>
+    <string name="widget_status_hint">Нажмите, когда начнётся боль</string>
+    <string name="toast_started">Записано: боль с %1$s</string>
+    <string name="toast_ended">Боль прошла. Длилась %1$s</string>
+</resources>

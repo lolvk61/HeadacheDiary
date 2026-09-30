@@ -14,9 +14,10 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/widget_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Дневник головной боли"
+            android:text="@string/app_name"
             android:textColor="@color/widget_text_secondary"
             android:textSize="12sp" />
 
@@ -26,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:maxLines="1"
-            android:text="Нажмите, когда начнётся боль"
+            android:text="@string/widget_status_hint"
             android:textColor="@color/widget_text"
             android:textSize="14sp" />
     </LinearLayout>
@@ -39,7 +40,7 @@
         android:layout_weight="1"
         android:background="@drawable/widget_button_pain"
         android:gravity="center"
-        android:text="Болит голова"
+        android:text="@string/hero_pain_title"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold" />

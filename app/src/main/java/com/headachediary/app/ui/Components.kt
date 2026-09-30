@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.headachediary.app.data.HeadacheType
@@ -58,7 +59,7 @@ fun TypeChip(type: HeadacheType) {
     }
     Surface(color = bg, shape = RoundedCornerShape(50)) {
         Text(
-            type.label,
+            stringResource(type.labelRes),
             color = fg,
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),

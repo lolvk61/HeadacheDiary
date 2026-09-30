@@ -45,8 +45,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
 import com.headachediary.app.data.MedHelp
@@ -99,15 +101,15 @@ fun EditorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Запись о боли", fontWeight = FontWeight.SemiBold) },
+                title = { Text(stringResource(R.string.editor_title), fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = ::saveAndClose) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { confirmDelete = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Удалить")
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
                     }
                 },
             )
@@ -116,7 +118,7 @@ fun EditorScreen(
             Surface(tonalElevation = 3.dp) {
                 Box(Modifier.navigationBarsPadding()) {
                     Button(onClick = ::saveAndClose, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text("Сохранить")
+                        Text(stringResource(R.string.save))
                     }
                 }
             }
@@ -126,40 +128,53 @@ fun EditorScreen(
             Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SectionCard("Время") {
-                TimeRow("Началась", formatDateTime(start)) { pickDateTime(context, start) { start = it } }
-                TimeRow("Закончилась", end?.let { formatDateTime(it) } ?: "ещё болит") {
+            SectionCard(stringResource(R.string.section_time)) {
+                TimeRow(stringResource(R.string.time_started), formatDateTime(context, start)) {
+                    pickDateTime(context, start) { start = it }
+                }
+                TimeRow(
+                    stringResource(R.string.time_ended),
+                    end?.let { formatDateTime(context, it) } ?: stringResource(R.string.time_still_hurts),
+                ) {
                     pickDateTime(context, end ?: System.currentTimeMillis()) { end = it }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { end = System.currentTimeMillis() }) { Text("Прошла сейчас") }
-                    if (end != null) TextButton(onClick = { end = null }) { Text("Ещё болит") }
+                    TextButton(onClick = { end = System.currentTimeMillis() }) {
+                        Text(stringResource(R.string.btn_ended_now))
+                    }
+                    if (end != null) {
+                        TextButton(onClick = { end = null }) { Text(stringResource(R.string.btn_still_hurts)) }
+                    }
                 }
                 val e = end
                 if (e != null && e < start) {
                     Text(
-                        "Время окончания раньше начала — оно не будет сохранено.",
+                        stringResource(R.string.err_end_before_start),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                     )
                 } else if (e != null) {
                     Text(
-                        "Длительность: ${formatDuration(e - start)}",
+                        stringResource(R.string.duration_label, formatDuration(context, e - start)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
 
-            SectionCard("Тип боли") {
+            SectionCard(stringResource(R.string.section_type)) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     HeadacheType.entries.forEach {
-                        FilterChip(selected = type == it, onClick = { type = it }, label = { Text(it.label) })
+                        FilterChip(
+                            selected = type == it,
+                            onClick = { type = it },
+                            label = { Text(stringResource(it.labelRes)) },
+                        )
                     }
                 }
             }
 
-            SectionCard("Сила боли") {
+            SectionCard(stringResource(R.string.section_intensity)) {
                 val color = painColor(intensity)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(56.dp).background(color, CircleShape), contentAlignment = Alignment.Center) {
@@ -172,9 +187,12 @@ fun EditorScreen(
                     }
                     Spacer(Modifier.width(14.dp))
                     Column {
-                        Text(intensityLabel(intensity), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            if (intensity == null) "Передвиньте ползунок" else "из 10",
+                            stringResource(intensityLabelRes(intensity)),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            stringResource(if (intensity == null) R.string.intensity_hint else R.string.intensity_of_10),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -193,10 +211,10 @@ fun EditorScreen(
                 )
             }
 
-            SectionCard("Симптомы") {
+            SectionCard(stringResource(R.string.section_symptoms)) {
                 SymptomGroup.entries.forEach { group ->
                     Text(
-                        group.title,
+                        stringResource(group.titleRes),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -205,30 +223,30 @@ fun EditorScreen(
                             FilterChip(
                                 selected = s.name in symptoms,
                                 onClick = { symptoms = symptoms.toggle(s.name) },
-                                label = { Text(s.label) },
+                                label = { Text(stringResource(s.labelRes)) },
                             )
                         }
                     }
                 }
             }
 
-            SectionCard("Возможные провокаторы") {
+            SectionCard(stringResource(R.string.section_triggers)) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Trigger.entries.forEach { t ->
                         FilterChip(
                             selected = t.name in triggers,
                             onClick = { triggers = triggers.toggle(t.name) },
-                            label = { Text(t.label) },
+                            label = { Text(stringResource(t.labelRes)) },
                         )
                     }
                 }
             }
 
-            SectionCard("Лекарство") {
+            SectionCard(stringResource(R.string.section_medication)) {
                 OutlinedTextField(
                     value = medication,
                     onValueChange = { medication = it },
-                    label = { Text("Что принимали и в какой дозе") },
+                    label = { Text(stringResource(R.string.med_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 if (medication.isNotBlank()) {
@@ -237,14 +255,14 @@ fun EditorScreen(
                             FilterChip(
                                 selected = medHelped == h.name,
                                 onClick = { medHelped = if (medHelped == h.name) "" else h.name },
-                                label = { Text(h.label) },
+                                label = { Text(stringResource(h.labelRes)) },
                             )
                         }
                     }
                 }
             }
 
-            SectionCard("Заметки") {
+            SectionCard(stringResource(R.string.section_notes)) {
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
@@ -258,15 +276,17 @@ fun EditorScreen(
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Удалить запись?") },
-            text = { Text("Это действие нельзя отменить.") },
+            title = { Text(stringResource(R.string.delete_title)) },
+            text = { Text(stringResource(R.string.delete_text)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmDelete = false
                     onDelete()
-                }) { Text("Удалить") }
+                }) { Text(stringResource(R.string.delete)) }
             },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Отмена") } },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) }
+            },
         )
     }
 }
@@ -282,6 +302,10 @@ private fun TimeRow(label: String, value: String, onClick: () -> Unit) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(value, style = MaterialTheme.typography.titleMedium)
         }
-        Text("Изменить", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        Text(
+            stringResource(R.string.time_change),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
     }
 }

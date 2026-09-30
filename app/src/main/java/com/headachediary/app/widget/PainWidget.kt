@@ -13,6 +13,7 @@ import com.headachediary.app.MainActivity
 import com.headachediary.app.R
 import com.headachediary.app.data.AppDatabase
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.settings.localized
 import com.headachediary.app.ui.formatDateTime
 import com.headachediary.app.ui.formatDuration
 import com.headachediary.app.ui.formatTime
@@ -25,15 +26,16 @@ import kotlinx.coroutines.withContext
 object PainWidget {
     /** Записывает начало боли или, если приступ идёт, его окончание. Возвращает текст для тоста. */
     suspend fun toggle(context: Context): String {
+        val ctx = context.localized()
         val dao = AppDatabase.get(context).dao()
         val latest = dao.latest()
         val now = System.currentTimeMillis()
         val message = if (latest != null && latest.isOngoing(now)) {
             dao.update(latest.copy(endTime = now))
-            "Боль прошла. Длилась ${formatDuration(now - latest.startTime)}"
+            ctx.getString(R.string.toast_ended, formatDuration(ctx, now - latest.startTime))
         } else {
             dao.insert(HeadacheEntry(startTime = now))
-            "Записано: боль с ${formatTime(now)}"
+            ctx.getString(R.string.toast_started, formatTime(now))
         }
         updateAll(context)
         return message
@@ -44,21 +46,23 @@ object PainWidget {
         val ids = manager.getAppWidgetIds(ComponentName(context, PainWidgetProvider::class.java))
         if (ids.isEmpty()) return
 
+        val ctx = context.localized()
         val latest = AppDatabase.get(context).dao().latest()
         val ongoing = latest?.isOngoing(System.currentTimeMillis()) == true
 
         val views = RemoteViews(context.packageName, R.layout.widget_pain)
+        views.setTextViewText(R.id.widget_title, ctx.getString(R.string.app_name))
         if (ongoing && latest != null) {
-            views.setTextViewText(R.id.widget_status, "Приступ с ${formatTime(latest.startTime)}")
-            views.setTextViewText(R.id.widget_button, "Боль прошла")
+            views.setTextViewText(R.id.widget_status, ctx.getString(R.string.widget_status_ongoing, formatTime(latest.startTime)))
+            views.setTextViewText(R.id.widget_button, ctx.getString(R.string.hero_end))
             views.setInt(R.id.widget_button, "setBackgroundResource", R.drawable.widget_button_end)
         } else {
             views.setTextViewText(
                 R.id.widget_status,
-                latest?.let { "Последний раз: ${formatDateTime(it.startTime)}" }
-                    ?: "Нажмите, когда начнётся боль",
+                latest?.let { ctx.getString(R.string.widget_status_last, formatDateTime(ctx, it.startTime)) }
+                    ?: ctx.getString(R.string.widget_status_hint),
             )
-            views.setTextViewText(R.id.widget_button, "Болит голова")
+            views.setTextViewText(R.id.widget_button, ctx.getString(R.string.hero_pain_title))
             views.setInt(R.id.widget_button, "setBackgroundResource", R.drawable.widget_button_pain)
         }
 

@@ -37,10 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
 import kotlinx.coroutines.delay
@@ -56,6 +59,7 @@ fun JournalScreen(
     onEnd: (HeadacheEntry) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val now by produceState(System.currentTimeMillis()) {
         while (true) {
             delay(30_000)
@@ -80,12 +84,12 @@ fun JournalScreen(
         item {
             Column {
                 Text(
-                    formatDayHeader(today),
+                    formatDayHeader(context, today),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    "Как вы себя чувствуете?",
+                    stringResource(R.string.journal_greeting),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                 )
@@ -97,15 +101,19 @@ fun JournalScreen(
         if (entries.isNotEmpty()) {
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatTile("Дней боли за 30 дн.", painDays.toString(), Modifier.weight(1f))
-                    StatTile("Дней мигрени", migraineDays.toString(), Modifier.weight(1f))
-                    StatTile("Дней без боли", painFreeDays?.toString() ?: "—", Modifier.weight(1f))
+                    StatTile(stringResource(R.string.tile_pain_days_30), painDays.toString(), Modifier.weight(1f))
+                    StatTile(stringResource(R.string.tile_migraine_days), migraineDays.toString(), Modifier.weight(1f))
+                    StatTile(
+                        stringResource(R.string.tile_pain_free_days),
+                        painFreeDays?.toString() ?: "—",
+                        Modifier.weight(1f),
+                    )
                 }
             }
             item { WeekStrip(today, byDay) }
             item {
                 Text(
-                    "История",
+                    stringResource(R.string.journal_history),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(top = 8.dp),
@@ -118,7 +126,7 @@ fun JournalScreen(
         byDay.forEach { (date, list) ->
             item(key = "header-$date") {
                 Text(
-                    formatDayHeader(date),
+                    formatDayHeader(context, date),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 4.dp),
@@ -139,6 +147,7 @@ private fun PainHero(
     onOpen: () -> Unit,
     onEnd: () -> Unit,
 ) {
+    val context = LocalContext.current
     val colors = if (ongoing == null) {
         listOf(Color(0xFFE85D5D), Color(0xFFB3261E))
     } else {
@@ -161,9 +170,14 @@ private fun PainHero(
                 }
                 Spacer(Modifier.width(16.dp))
                 Column {
-                    Text("Болит голова", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
                     Text(
-                        "Нажмите — время запишется сразу",
+                        stringResource(R.string.hero_pain_title),
+                        color = Color.White,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        stringResource(R.string.hero_pain_subtitle),
                         color = Color.White.copy(alpha = 0.85f),
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -171,9 +185,18 @@ private fun PainHero(
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Приступ идёт", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
                 Text(
-                    "С ${formatTime(ongoing.startTime)} · уже ${formatDuration(now - ongoing.startTime)}",
+                    stringResource(R.string.hero_ongoing_title),
+                    color = Color.White,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    stringResource(
+                        R.string.hero_ongoing_subtitle,
+                        formatTime(ongoing.startTime),
+                        formatDuration(context, now - ongoing.startTime),
+                    ),
                     color = Color.White.copy(alpha = 0.85f),
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -185,12 +208,12 @@ private fun PainHero(
                             containerColor = Color.White,
                             contentColor = Color(0xFFB3261E),
                         ),
-                    ) { Text("Боль прошла") }
+                    ) { Text(stringResource(R.string.hero_end)) }
                     OutlinedButton(
                         onClick = onOpen,
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f)),
-                    ) { Text("Добавить детали") }
+                    ) { Text(stringResource(R.string.hero_details)) }
                 }
             }
         }
@@ -199,9 +222,10 @@ private fun PainHero(
 
 @Composable
 private fun WeekStrip(today: LocalDate, byDay: Map<LocalDate, List<HeadacheEntry>>) {
+    val locale = LocalContext.current.appLocale()
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
         Column(Modifier.padding(16.dp)) {
-            Text("Последние 7 дней", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.week_title), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(12.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 for (back in 6 downTo 0) {
@@ -212,7 +236,7 @@ private fun WeekStrip(today: LocalDate, byDay: Map<LocalDate, List<HeadacheEntry
                     val fg = if (list.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant else onPainColor(maxIntensity)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            date.dayOfWeek.getDisplayName(DateTextStyle.SHORT, ruLocale),
+                            date.dayOfWeek.getDisplayName(DateTextStyle.SHORT, locale),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -245,11 +269,14 @@ private fun EmptyState() {
             )
         }
         Spacer(Modifier.height(16.dp))
-        Text("Пока нет записей", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(
+            stringResource(R.string.empty_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
         Spacer(Modifier.height(4.dp))
         Text(
-            "Когда начнётся боль, нажмите красную кнопку выше — время сохранится автоматически. " +
-                "Здесь появятся история, статистика и календарь.",
+            stringResource(R.string.empty_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

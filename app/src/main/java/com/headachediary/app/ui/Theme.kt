@@ -1,6 +1,6 @@
 package com.headachediary.app.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.annotation.StringRes
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +8,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.headachediary.app.R
 
 private val LightColors = lightColorScheme(
     primary = Color(0xFF5B4B9A),
@@ -72,9 +73,9 @@ private val DarkColors = darkColorScheme(
 )
 
 @Composable
-fun HeadacheTheme(content: @Composable () -> Unit) {
+fun HeadacheTheme(darkTheme: Boolean, content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
+        colorScheme = if (darkTheme) DarkColors else LightColors,
         content = content,
     )
 }
@@ -95,10 +96,11 @@ fun painColor(intensity: Int?): Color = when {
 fun onPainColor(intensity: Int?): Color =
     if (intensity != null && intensity <= 3) Color.Black else Color.White
 
-fun intensityLabel(intensity: Int?): String = when {
-    intensity == null -> "Сила не указана"
-    intensity <= 3 -> "Слабая"
-    intensity <= 6 -> "Средняя"
-    intensity <= 8 -> "Сильная"
-    else -> "Очень сильная"
+@StringRes
+fun intensityLabelRes(intensity: Int?): Int = when {
+    intensity == null -> R.string.intensity_none
+    intensity <= 3 -> R.string.intensity_weak
+    intensity <= 6 -> R.string.intensity_medium
+    intensity <= 8 -> R.string.intensity_strong
+    else -> R.string.intensity_very_strong
 }

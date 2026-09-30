@@ -1,6 +1,5 @@
 package com.headachediary.app.ui
 
-import android.content.Intent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -28,104 +29,91 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
-import com.headachediary.app.data.HeadacheType
-import com.headachediary.app.data.Symptom
-import com.headachediary.app.data.Trigger
-import com.headachediary.app.data.toKeySet
+import com.headachediary.app.data.computeStats
 import java.time.LocalDate
-import java.util.Locale
 
 @Composable
 fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var days by rememberSaveable { mutableIntStateOf(30) }
+    var showReport by remember { mutableStateOf(false) }
     val since = System.currentTimeMillis() - days * DAY_MS
-    val list = entries.filter { it.startTime >= since }
-
-    val painDays = list.map { it.startTime.toLocalDate() }.distinct().size
-    val migraineDays = list.filter { it.type == HeadacheType.MIGRAINE.name }
-        .map { it.startTime.toLocalDate() }.distinct().size
-    val tensionDays = list.filter { it.type == HeadacheType.TENSION.name }
-        .map { it.startTime.toLocalDate() }.distinct().size
-    val medDays = list.filter { it.medication.isNotBlank() }
-        .map { it.startTime.toLocalDate() }.distinct().size
-    val avgIntensity = list.mapNotNull { it.intensity }.takeIf { it.isNotEmpty() }?.average()
-    val avgDuration = list.mapNotNull { e -> e.endTime?.let { it - e.startTime } }
-        .takeIf { it.isNotEmpty() }?.average()?.toLong()
-
-    fun topKeys(selector: (HeadacheEntry) -> String, label: (String) -> String?): List<Pair<String, Int>> =
-        list.flatMap { selector(it).toKeySet() }
-            .groupingBy { it }.eachCount()
-            .entries.sortedByDescending { it.value }
-            .mapNotNull { (k, v) -> label(k)?.let { it to v } }
-            .take(5)
-
-    val topTriggers = topKeys({ it.triggers }) { k -> Trigger.entries.firstOrNull { it.name == k }?.label }
-    val topSymptoms = topKeys({ it.symptoms }) { k -> Symptom.entries.firstOrNull { it.name == k }?.label }
+    val stats = computeStats(entries.filter { it.startTime >= since })
 
     Column(
         modifier.verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("Статистика", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(
+            stringResource(R.string.stats_title),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(selected = days == 30, onClick = { days = 30 }, label = { Text("30 дней") })
-            FilterChip(selected = days == 90, onClick = { days = 90 }, label = { Text("90 дней") })
-            FilterChip(selected = days == 365, onClick = { days = 365 }, label = { Text("Год") })
+            FilterChip(selected = days == 30, onClick = { days = 30 }, label = { Text(stringResource(R.string.period_30)) })
+            FilterChip(selected = days == 90, onClick = { days = 90 }, label = { Text(stringResource(R.string.period_90)) })
+            FilterChip(selected = days == 365, onClick = { days = 365 }, label = { Text(stringResource(R.string.period_year)) })
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            StatTile("Дней с болью", painDays.toString(), Modifier.weight(1f))
-            StatTile("Дней мигрени", migraineDays.toString(), Modifier.weight(1f))
-            StatTile("Обычная боль", tensionDays.toString(), Modifier.weight(1f))
+            StatTile(stringResource(R.string.stat_pain_days), stats.painDays.toString(), Modifier.weight(1f))
+            StatTile(stringResource(R.string.stat_migraine_days), stats.migraineDays.toString(), Modifier.weight(1f))
+            StatTile(stringResource(R.string.stat_tension_days), stats.tensionDays.toString(), Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatTile(
-                "Средняя сила",
-                avgIntensity?.let { String.format(Locale.US, "%.1f", it) } ?: "—",
+                stringResource(R.string.stat_avg_intensity),
+                stats.avgIntensity?.let { String.format(context.appLocale(), "%.1f", it) } ?: "—",
                 Modifier.weight(1f),
             )
-            StatTile("Средняя длительность", avgDuration?.let { formatDuration(it) } ?: "—", Modifier.weight(1f))
-            StatTile("Дней с лекарством", medDays.toString(), Modifier.weight(1f))
+            StatTile(
+                stringResource(R.string.stat_avg_duration),
+                stats.avgDurationMs?.let { formatDuration(context, it) } ?: "—",
+                Modifier.weight(1f),
+            )
+            StatTile(stringResource(R.string.stat_med_days), stats.medDays.toString(), Modifier.weight(1f))
         }
 
-        if (days == 30 && medDays >= 10) {
+        if (days == 30 && stats.medDays >= 10) {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Text(
-                    "Обезболивающие принимались 10 и более дней за месяц. Частый приём лекарств " +
-                        "сам может усиливать головную боль — стоит обсудить это с врачом.",
+                    stringResource(R.string.warn_med_overuse),
                     Modifier.padding(16.dp),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }
         }
 
         PainBars(entries)
-        RankCard("Частые провокаторы", topTriggers)
-        RankCard("Частые симптомы", topSymptoms)
+        RankCard(
+            stringResource(R.string.rank_triggers),
+            stats.topTriggers.map { (t, n) -> context.getString(t.labelRes) to n },
+        )
+        RankCard(
+            stringResource(R.string.rank_symptoms),
+            stats.topSymptoms.map { (s, n) -> context.getString(s.labelRes) to n },
+        )
 
         Button(
-            onClick = {
-                val send = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, "Дневник головной боли")
-                    putExtra(Intent.EXTRA_TEXT, buildCsv(entries))
-                }
-                context.startActivity(Intent.createChooser(send, "Отправить дневник"))
-            },
+            onClick = { showReport = true },
             enabled = entries.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Экспорт для врача (все записи)") }
+        ) { Text(stringResource(R.string.btn_doctor_report)) }
 
         Text(
-            "Приложение ведёт дневник и не заменяет консультацию врача.",
+            stringResource(R.string.disclaimer),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+
+    if (showReport) DoctorReportDialog(entries) { showReport = false }
 }
 
 /** Столбики по дням за последние 30 дней: высота и цвет зависят от силы боли. */
@@ -141,9 +129,9 @@ private fun PainBars(entries: List<HeadacheEntry>) {
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
         Column(Modifier.padding(16.dp)) {
-            Text("Сила боли по дням", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.bars_title), style = MaterialTheme.typography.titleMedium)
             Text(
-                "Последние 30 дней",
+                stringResource(R.string.bars_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -169,8 +157,8 @@ private fun PainBars(entries: List<HeadacheEntry>) {
             }
             Spacer(Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("30 дн. назад", style = MaterialTheme.typography.labelSmall)
-                Text("сегодня", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.bars_30_ago), style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.bars_today), style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -183,7 +171,7 @@ private fun RankCard(title: String, items: List<Pair<String, Int>>) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             if (items.isEmpty()) {
                 Text(
-                    "Пока нет данных за выбранный период.",
+                    stringResource(R.string.rank_no_data),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
