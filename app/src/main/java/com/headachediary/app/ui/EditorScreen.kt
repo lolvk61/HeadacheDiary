@@ -72,13 +72,20 @@ fun EditorScreen(
     onClose: () -> Unit,
     onEnsureWeather: () -> Unit,
     onRefreshWeather: ((WeatherOutcome) -> Unit) -> Unit,
+    onEnsureHealth: () -> Unit,
+    onRefreshHealth: ((Boolean) -> Unit) -> Unit,
 ) {
     val context = LocalContext.current
     val weatherEnabled = AppSettings.weatherEnabled(context)
+    val healthEnabled = AppSettings.healthEnabled(context)
     var refreshingWeather by remember { mutableStateOf(false) }
+    var refreshingHealth by remember { mutableStateOf(false) }
 
-    // Если запись открыта без погоды (например, не было сети), пробуем дописать её один раз.
-    LaunchedEffect(entry.id) { onEnsureWeather() }
+    // Если запись открыта без погоды или данных с часов (например, не было сети), пробуем дописать один раз.
+    LaunchedEffect(entry.id) {
+        onEnsureWeather()
+        onEnsureHealth()
+    }
 
     var start by remember(entry.id) { mutableLongStateOf(entry.startTime) }
     var end by remember(entry.id) { mutableStateOf(entry.endTime) }
@@ -224,6 +231,45 @@ fun EditorScreen(
                             Text(
                                 stringResource(if (refreshingWeather) R.string.weather_loading else R.string.weather_refresh),
                             )
+                        }
+                    }
+                }
+            }
+
+            val hasHealth = entry.sleepMinutes != null || entry.steps24h != null || entry.restingHeartRate != null
+            if (healthEnabled || hasHealth) {
+                SectionCard(stringResource(R.string.section_health)) {
+                    if (hasHealth) {
+                        entry.sleepMinutes?.let {
+                            WeatherRow(stringResource(R.string.health_sleep), formatDuration(context, it * 60_000L))
+                        }
+                        entry.steps24h?.let {
+                            WeatherRow(stringResource(R.string.health_steps), String.format(context.appLocale(), "%,d", it))
+                        }
+                        entry.restingHeartRate?.let {
+                            WeatherRow(stringResource(R.string.health_resting_hr), stringResource(R.string.health_bpm, it))
+                        }
+                    } else {
+                        Text(
+                            stringResource(R.string.health_none),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (healthEnabled) {
+                        TextButton(
+                            enabled = !refreshingHealth,
+                            onClick = {
+                                refreshingHealth = true
+                                onRefreshHealth { ok ->
+                                    refreshingHealth = false
+                                    if (!ok) {
+                                        Toast.makeText(context, context.getString(R.string.health_failed), Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            },
+                        ) {
+                            Text(stringResource(if (refreshingHealth) R.string.weather_loading else R.string.health_refresh))
                         }
                     }
                 }

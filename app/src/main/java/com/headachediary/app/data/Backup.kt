@@ -9,7 +9,7 @@ data class BackupData(val entries: List<HeadacheEntry>, val painFreeDays: List<L
 /** Резервная копия в формате JSON: переносится между телефонами и читается человеком. */
 object Backup {
     private const val APP_ID = "HeadacheDiary"
-    private const val FORMAT_VERSION = 3
+    private const val FORMAT_VERSION = 4
     private const val MAX_TEXT = 5_000
 
     fun toJson(
@@ -36,6 +36,9 @@ object Backup {
                     e.pressureChange24h?.let { put("pressureChange24h", it) }
                     e.humidity?.let { put("humidity", it) }
                     e.weatherCode?.let { put("weatherCode", it) }
+                    e.sleepMinutes?.let { put("sleepMinutes", it) }
+                    e.steps24h?.let { put("steps24h", it) }
+                    e.restingHeartRate?.let { put("restingHeartRate", it) }
                 },
             )
         }
@@ -86,6 +89,9 @@ object Backup {
                 pressureChange24h = o.optNumber("pressureChange24h"),
                 humidity = o.optNumber("humidity")?.toInt(),
                 weatherCode = o.optNumber("weatherCode")?.toInt(),
+                sleepMinutes = o.optNumber("sleepMinutes")?.toInt(),
+                steps24h = o.optNumber("steps24h")?.toInt(),
+                restingHeartRate = o.optNumber("restingHeartRate")?.toInt(),
             )
         }
 

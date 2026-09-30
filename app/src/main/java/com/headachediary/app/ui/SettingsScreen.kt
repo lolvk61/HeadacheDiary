@@ -39,9 +39,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
 import com.headachediary.app.MainViewModel
 import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.health.HealthService
 import com.headachediary.app.reminders.Notifications
 import com.headachediary.app.reminders.ReminderScheduler
 import com.headachediary.app.settings.AppLanguage
@@ -132,6 +135,19 @@ fun SettingsScreen(
         // Без доступа к геолокации погоду всё равно можно включить: достаточно указать город.
         if (result.values.none { it }) toast(context.getString(R.string.weather_permission_denied))
         enableWeather()
+    }
+
+    var healthOn by remember { mutableStateOf(AppSettings.healthEnabled(context)) }
+    val healthLauncher = rememberLauncherForActivityResult(
+        PermissionController.createRequestPermissionResultContract(),
+    ) { granted: Set<String> ->
+        if (granted.isEmpty()) {
+            toast(context.getString(R.string.health_permission_denied))
+        } else {
+            AppSettings.setHealthEnabled(context, true)
+            healthOn = true
+            vm.fillRecentHealth()
+        }
     }
 
     fun searchCity() {
@@ -322,6 +338,41 @@ fun SettingsScreen(
                     )
                 }
             }
+        }
+
+        SectionCard(stringResource(R.string.settings_health)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    stringResource(R.string.health_switch),
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Switch(
+                    checked = healthOn,
+                    onCheckedChange = { on ->
+                        if (!on) {
+                            AppSettings.setHealthEnabled(context, false)
+                            healthOn = false
+                        } else {
+                            when (HealthService.sdkStatus(context)) {
+                                HealthConnectClient.SDK_AVAILABLE -> healthLauncher.launch(HealthService.permissions)
+                                HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED ->
+                                    toast(context.getString(R.string.health_update_required))
+                                else -> toast(context.getString(R.string.health_unavailable))
+                            }
+                        }
+                    },
+                )
+            }
+            Text(
+                stringResource(R.string.health_switch_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
 
         SectionCard(stringResource(R.string.settings_reminders)) {

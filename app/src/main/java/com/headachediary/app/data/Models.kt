@@ -29,7 +29,17 @@ data class HeadacheEntry(
     val pressureChange24h: Double? = null,
     val humidity: Int? = null,
     val weatherCode: Int? = null,
+    // Данные с часов из Health Connect на момент начала приступа; null — не получены.
+    /** Самый длинный сон, закончившийся перед приступом, в минутах (без бодрствования). */
+    val sleepMinutes: Int? = null,
+    /** Шаги за 24 часа до приступа. */
+    val steps24h: Int? = null,
+    /** Последний записанный пульс в покое перед приступом. */
+    val restingHeartRate: Int? = null,
 )
+
+/** Ночь короче этого порога (в минутах) считаем короткой. */
+const val SHORT_SLEEP_MINUTES = 360
 
 /** День (число дней от 1970-01-01 по местному календарю), который пользователь отметил как «без боли». */
 @Entity(tableName = "pain_free_days")

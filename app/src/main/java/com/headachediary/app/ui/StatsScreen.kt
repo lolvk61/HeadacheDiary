@@ -35,7 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.data.SHORT_SLEEP_MINUTES
 import com.headachediary.app.data.computeStats
+import com.headachediary.app.health.HealthBaseline
+import com.headachediary.app.health.HealthService
 import com.headachediary.app.data.hasSharpPressureChange
 import com.headachediary.app.settings.AppSettings
 import com.headachediary.app.weather.WeatherClient
@@ -105,6 +108,7 @@ fun StatsScreen(entries: List<HeadacheEntry>, painFreeDays: Set<Long>, modifier:
 
         PainBars(entries)
         WeatherCard(entries, windowDays = minOf(days, WeatherClient.MAX_PAST_DAYS))
+        HealthCard(entries, windowDays = minOf(days, WeatherClient.MAX_PAST_DAYS))
         RankCard(
             stringResource(R.string.rank_triggers),
             stats.topTriggers.map { (t, n) -> context.getString(t.labelRes) to n },
@@ -267,6 +271,110 @@ private fun WeatherCard(entries: List<HeadacheEntry>, windowDays: Int) {
 }
 
 private const val MIN_ATTACKS_FOR_VERDICT = 5
+
+/** Результат расчёта «обычного фона»; null внутри — данных нет. */
+private data class HealthBaselineState(val value: HealthBaseline?)
+
+/**
+ * Сравнивает сон, шаги и пульс в покое перед приступами с обычными значениями за тот же период
+ * (данные с часов из Health Connect).
+ */
+@Composable
+private fun HealthCard(entries: List<HeadacheEntry>, windowDays: Int) {
+    val context = LocalContext.current
+    val enabled = AppSettings.healthEnabled(context)
+    val since = System.currentTimeMillis() - windowDays * DAY_MS
+    val inWindow = entries.filter { it.startTime >= since }
+    val sleeps = inWindow.mapNotNull { it.sleepMinutes }
+    val steps = inWindow.mapNotNull { it.steps24h }
+    val hearts = inWindow.mapNotNull { it.restingHeartRate }
+    if (!enabled && sleeps.isEmpty() && steps.isEmpty() && hearts.isEmpty()) return
+
+    val baselineState by produceState<HealthBaselineState?>(null, windowDays, enabled, sleeps.size) {
+        value = null
+        value = HealthBaselineState(if (enabled) HealthService.baseline(context, windowDays) else null)
+    }
+    val baseline = baselineState?.value
+
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.health_stats_title), style = MaterialTheme.typography.titleMedium)
+            if (sleeps.isEmpty() && steps.isEmpty() && hearts.isEmpty()) {
+                Text(
+                    stringResource(R.string.health_stats_no_data),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                return@Column
+            }
+
+            if (sleeps.isNotEmpty()) {
+                val short = sleeps.count { it < SHORT_SLEEP_MINUTES }
+                val shortShare = short.toDouble() / sleeps.size
+                Text(
+                    stringResource(
+                        R.string.health_stats_avg_sleep,
+                        formatDuration(context, sleeps.average().toLong() * 60_000L),
+                        sleeps.size,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    stringResource(R.string.health_stats_short_sleep, short, sleeps.size, (shortShare * 100).roundToInt()),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                baseline?.shortSleepShare?.let {
+                    Text(
+                        stringResource(R.string.health_stats_short_baseline, (it * 100).roundToInt()),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                val usualShort = baseline?.shortSleepShare
+                val verdict = when {
+                    sleeps.size < MIN_ATTACKS_FOR_VERDICT -> R.string.health_verdict_few
+                    usualShort == null -> null
+                    shortShare >= 0.3 && shortShare >= 1.5 * usualShort -> R.string.health_verdict_more
+                    else -> R.string.health_verdict_none
+                }
+                if (verdict != null) {
+                    Text(
+                        stringResource(verdict),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+            }
+            if (steps.isNotEmpty()) {
+                val avg = steps.average().roundToInt()
+                Text(
+                    stringResource(
+                        R.string.health_stats_steps,
+                        String.format(context.appLocale(), "%,d", avg),
+                        baseline?.avgSteps?.let { String.format(context.appLocale(), "%,d", it) } ?: "—",
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            if (hearts.isNotEmpty()) {
+                Text(
+                    stringResource(
+                        R.string.health_stats_hr,
+                        hearts.average().roundToInt(),
+                        baseline?.avgRestingHeartRate?.toString() ?: "—",
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Text(
+                stringResource(R.string.health_stats_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
 
 @Composable
 private fun RankCard(title: String, items: List<Pair<String, Int>>) {

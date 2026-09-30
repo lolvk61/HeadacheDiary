@@ -30,6 +30,7 @@ object AppSettings {
     private const val KEY_LANGUAGE = "language"
     private const val KEY_WEATHER = "weather"
     private const val KEY_PRESSURE_UNIT = "pressure_unit"
+    private const val KEY_HEALTH = "health"
     private const val KEY_REMINDER = "reminder"
     private const val KEY_REMINDER_MINUTES = "reminder_minutes"
     private const val KEY_FORECAST_ALERT = "forecast_alert"
@@ -58,6 +59,14 @@ object AppSettings {
 
     fun setWeatherEnabled(context: Context, enabled: Boolean) {
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_WEATHER, enabled).apply()
+    }
+
+    /** Подтягивать ли сон, шаги и пульс в покое из Health Connect. */
+    fun healthEnabled(context: Context): Boolean =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getBoolean(KEY_HEALTH, false)
+
+    fun setHealthEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_HEALTH, enabled).apply()
     }
 
     /** Вечернее напоминание «была ли сегодня боль?». */

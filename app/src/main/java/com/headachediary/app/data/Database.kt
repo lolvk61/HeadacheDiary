@@ -56,6 +56,13 @@ interface EntryDao {
         weatherCode: Int?,
     )
 
+    /** Обновляет только поля данных с часов. */
+    @Query(
+        "UPDATE entries SET sleepMinutes = :sleepMinutes, steps24h = :steps24h, " +
+            "restingHeartRate = :restingHeartRate WHERE id = :id",
+    )
+    suspend fun updateHealth(id: Long, sleepMinutes: Int?, steps24h: Int?, restingHeartRate: Int?)
+
     @Delete
     suspend fun delete(entry: HeadacheEntry)
 
@@ -77,7 +84,7 @@ interface EntryDao {
     suspend fun unmarkPainFree(day: Long)
 }
 
-@Database(entities = [HeadacheEntry::class, PainFreeDay::class], version = 3, exportSchema = false)
+@Database(entities = [HeadacheEntry::class, PainFreeDay::class], version = 4, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun dao(): EntryDao
 
@@ -106,12 +113,23 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Версия 4: данные с часов (сон, шаги, пульс в покое). */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                listOf(
+                    "sleepMinutes INTEGER",
+                    "steps24h INTEGER",
+                    "restingHeartRate INTEGER",
+                ).forEach { column -> db.execSQL("ALTER TABLE entries ADD COLUMN $column") }
+            }
+        }
+
         fun get(context: Context): AppDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
                 "headache.db",
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { instance = it }
         }
     }
 }

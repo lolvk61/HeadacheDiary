@@ -9,6 +9,7 @@ import com.headachediary.app.data.AppDatabase
 import com.headachediary.app.data.Backup
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.PainFreeDay
+import com.headachediary.app.health.HealthService
 import com.headachediary.app.settings.AppSettings
 import com.headachediary.app.ui.toLocalDate
 import com.headachediary.app.weather.LocationHelper
@@ -47,9 +48,25 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val id = dao.insert(HeadacheEntry(startTime = time))
             PainWidget.updateAll(context)
             onCreated(id)
-            // Запись уже сохранена со временем; погода дописывается следом, если функция включена.
+            // Запись уже сохранена со временем; погода и данные с часов дописываются следом, если включены.
             WeatherService.attach(context, id)
+            HealthService.attach(context, id)
         }
+    }
+
+    /** Открытая запись без данных с часов: пробуем дописать (часы могли синхронизироваться позже). */
+    fun ensureHealth(entry: HeadacheEntry) {
+        if (entry.sleepMinutes != null && entry.steps24h != null && entry.restingHeartRate != null) return
+        viewModelScope.launch { HealthService.attach(context, entry.id) }
+    }
+
+    fun refreshHealth(entryId: Long, onDone: (Boolean) -> Unit) {
+        viewModelScope.launch { onDone(HealthService.attach(context, entryId, force = true)) }
+    }
+
+    /** При запуске дописывает данные с часов в недавние записи, у которых их ещё нет. */
+    fun fillRecentHealth() {
+        viewModelScope.launch { HealthService.fillRecent(context) }
     }
 
     fun markPainFree(day: Long) {

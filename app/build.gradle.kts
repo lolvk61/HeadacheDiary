@@ -47,6 +47,9 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
 
+    // Более новые версии (1.1.0-beta02 и выше) требуют compileSdk 36 и AGP 8.9.1; beta01 подходит к текущей сборке.
+    implementation("androidx.health.connect:connect-client:1.1.0-beta01")
+
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")

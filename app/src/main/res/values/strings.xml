@@ -314,6 +314,44 @@
     <string name="outlook_calm_title">Pressure outlook</string>
     <string name="outlook_calm_text">Pressure looks steady over the next 24 hours.</string>
 
+    <!-- Health Connect -->
+    <string name="section_health">Sleep and activity</string>
+    <string name="health_sleep">Sleep before the attack</string>
+    <string name="health_steps">Steps in the 24 h before</string>
+    <string name="health_resting_hr">Resting heart rate</string>
+    <string name="health_bpm">%1$d bpm</string>
+    <string name="health_none">No data from your watch for this entry yet. It can appear after the watch syncs.</string>
+    <string name="health_refresh">Update watch data</string>
+    <string name="health_failed">No data found. Check that the watch has synced with Health Connect and that access is allowed.</string>
+    <string name="settings_health">Watch data (Health Connect)</string>
+    <string name="health_switch">Read sleep and activity from Health Connect</string>
+    <string name="health_switch_desc">Adds the night sleep, steps and resting heart rate before each attack, for example from a Nothing or CMF watch that syncs to Health Connect. The app only reads this data, keeps it on this phone and never sends it anywhere.</string>
+    <string name="health_permission_denied">Access to Health Connect was not granted</string>
+    <string name="health_update_required">Update or install Health Connect in Google Play first</string>
+    <string name="health_unavailable">Health Connect is not available on this phone</string>
+    <string name="health_rationale_title">Why the app reads Health Connect</string>
+    <string name="health_rationale_body">Headache Diary reads your sleep, steps and resting heart rate from Health Connect to show what happened before an attack and to check whether short nights or low activity go together with your headaches. The data is used only on this phone, is never sent anywhere and is never written back. You can withdraw access at any time in the Health Connect settings.</string>
+    <string name="close">Close</string>
+    <string name="health_stats_title">Sleep and activity</string>
+    <string name="health_stats_no_data">No watch data for attacks in this period yet. Turn on reading in Settings.</string>
+    <string name="health_stats_avg_sleep">Average sleep before an attack: %1$s (%2$d attacks with data)</string>
+    <string name="health_stats_short_sleep">Attacks after a night shorter than 6 hours: %1$d of %2$d (%3$d%%)</string>
+    <string name="health_stats_short_baseline">For comparison, nights shorter than 6 hours make up %1$d%% of all nights in the same period</string>
+    <string name="health_verdict_few">Not enough data yet: at least 5 attacks with sleep data are needed.</string>
+    <string name="health_verdict_more">By your entries, attacks follow short nights noticeably more often than usual. Sleep may be one of your triggers — worth discussing with a doctor.</string>
+    <string name="health_verdict_none">No clear link between attacks and short nights is visible so far.</string>
+    <string name="health_stats_steps">Steps in the 24 h before an attack: %1$s on average (usual day: %2$s)</string>
+    <string name="health_stats_hr">Resting heart rate before an attack: %1$d on average (usual: %2$s)</string>
+    <string name="health_stats_note">This is only a statistical hint from your own entries, not a diagnosis.</string>
+
+    <!-- Health Connect: doctor report -->
+    <string name="report_avg_sleep">Average sleep before an attack: %1$s</string>
+    <string name="report_short_sleep">Attacks after a night shorter than 6 hours: %1$d of %2$d</string>
+    <string name="report_health">Sleep and activity: %1$s</string>
+    <string name="report_sleep">sleep before the attack %1$s</string>
+    <string name="report_steps">steps in the previous 24 h: %1$s</string>
+    <string name="report_resting_hr">resting heart rate: %1$d</string>
+
     <!-- Weather: doctor report -->
     <string name="report_sharp_pressure">Attacks with a pressure change of 3 hPa or more within 3 hours: %1$d of %2$d</string>
     <string name="report_weather">Weather: %1$s</string>

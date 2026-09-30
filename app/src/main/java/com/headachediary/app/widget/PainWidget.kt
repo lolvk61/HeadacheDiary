@@ -13,6 +13,7 @@ import com.headachediary.app.MainActivity
 import com.headachediary.app.R
 import com.headachediary.app.data.AppDatabase
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.health.HealthService
 import com.headachediary.app.settings.localized
 import com.headachediary.app.ui.formatDateTime
 import com.headachediary.app.ui.formatDuration
@@ -107,6 +108,7 @@ class PainWidgetProvider : AppWidgetProvider() {
 }
 
 private const val WEATHER_TIMEOUT_MS = 9_000L
+private const val HEALTH_TIMEOUT_MS = 4_000L
 
 /** Не экспортируется: срабатывает только от нажатия на кнопку виджета этого приложения. */
 class PainToggleReceiver : BroadcastReceiver() {
@@ -122,6 +124,7 @@ class PainToggleReceiver : BroadcastReceiver() {
                 // Время уже записано и показано; погода дописывается после, в пределах времени, отпущенного приёмнику.
                 result.startedId?.let { id ->
                     withTimeoutOrNull(WEATHER_TIMEOUT_MS) { WeatherService.attach(appContext, id) }
+                    withTimeoutOrNull(HEALTH_TIMEOUT_MS) { HealthService.attach(appContext, id) }
                 }
             } finally {
                 pending.finish()

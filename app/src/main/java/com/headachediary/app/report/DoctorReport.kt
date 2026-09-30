@@ -16,6 +16,7 @@ import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
 import com.headachediary.app.data.MedHelp
+import com.headachediary.app.data.SHORT_SLEEP_MINUTES
 import com.headachediary.app.data.computeStats
 import com.headachediary.app.data.hasSharpPressureChange
 import com.headachediary.app.data.symptomLabels
@@ -118,6 +119,22 @@ object DoctorReport {
                 ),
             )
         }
+        val sleeps = list.mapNotNull { it.sleepMinutes }
+        if (sleeps.isNotEmpty()) {
+            bullet(
+                context.getString(
+                    R.string.report_avg_sleep,
+                    formatDuration(context, sleeps.average().toLong() * 60_000L),
+                ),
+            )
+            bullet(
+                context.getString(
+                    R.string.report_short_sleep,
+                    sleeps.count { it < SHORT_SLEEP_MINUTES },
+                    sleeps.size,
+                ),
+            )
+        }
         val medDaysLast30 = computeStats(select(allEntries, 30, now)).medDays
         if (medDaysLast30 >= 10) {
             w.spacer(4f)
@@ -145,6 +162,7 @@ object DoctorReport {
             lines += "${dayFmt.format(e.startTime.toLocalDate())}, $timeText" to boldPaint
             lines += "$type · $intensityText" to bodyPaint
             weatherLine(context, e)?.let { lines += context.getString(R.string.report_weather, it) to bodyPaint }
+            healthLine(context, e)?.let { lines += context.getString(R.string.report_health, it) to bodyPaint }
             e.symptoms.symptomLabels(context).takeIf { it.isNotEmpty() }?.let {
                 lines += context.getString(R.string.report_symptoms, it.joinToString(", ")) to bodyPaint
             }
@@ -189,6 +207,19 @@ object DoctorReport {
             }
             parts += text
         }
+        return parts.takeIf { it.isNotEmpty() }?.joinToString(", ")
+    }
+
+    /** «сон перед приступом 9 ч 50 мин, шагов за сутки до приступа: 3 200, пульс в покое: 62» или null. */
+    private fun healthLine(context: Context, e: HeadacheEntry): String? {
+        val parts = mutableListOf<String>()
+        e.sleepMinutes?.let {
+            parts += context.getString(R.string.report_sleep, formatDuration(context, it * 60_000L))
+        }
+        e.steps24h?.let {
+            parts += context.getString(R.string.report_steps, String.format(context.appLocale(), "%,d", it))
+        }
+        e.restingHeartRate?.let { parts += context.getString(R.string.report_resting_hr, it) }
         return parts.takeIf { it.isNotEmpty() }?.joinToString(", ")
     }
 

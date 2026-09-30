@@ -157,7 +157,10 @@ fun App(
     }
 
     // При запуске обновляем запомненное местоположение: виджету в фоне Android живые координаты не отдаёт.
-    LaunchedEffect(Unit) { vm.refreshLocation() }
+    LaunchedEffect(Unit) {
+        vm.refreshLocation()
+        vm.fillRecentHealth()
+    }
 
     if (editingId != null) {
         // Пока только что созданная запись ещё не пришла из базы, показываем пустой экран.
@@ -172,6 +175,8 @@ fun App(
                 onClose = { editingId = null },
                 onEnsureWeather = { vm.ensureWeather(editing) },
                 onRefreshWeather = { done -> vm.refreshWeather(editing.id, done) },
+                onEnsureHealth = { vm.ensureHealth(editing) },
+                onRefreshHealth = { done -> vm.refreshHealth(editing.id, done) },
             )
         }
         return
