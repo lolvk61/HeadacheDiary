@@ -1,5 +1,16 @@
 # Headache Diary / Дневник головной боли (Android)
 
+Дневник головной боли и мигрени для Android: время начала приступа записывается одним нажатием, есть виджеты,
+календарь, статистика, по желанию погода и давление, данные с часов через Health Connect и PDF-отчёт для врача.
+Все данные хранятся только на телефоне.
+
+## Скачать
+Готовый APK (Android 8.0 и новее) лежит в [Releases](../../releases/latest). Откройте файл на телефоне и разрешите
+установку из этого источника. Приложение подписано ключом автора; контрольная сумма SHA-256 указана в описании релиза.
+
+**English:** a headache and migraine diary for Android 8.0+. Download the APK from
+[Releases](../../releases/latest), open it on the phone and allow installing from this source. All data stays on the phone.
+
 Kotlin + Jetpack Compose + Room. Данные хранятся только на телефоне.
 
 ## Сборка
@@ -44,3 +55,7 @@ Kotlin + Jetpack Compose + Room. Данные хранятся только на
 ## Заметки
 - Приложение не заменяет консультацию врача; выводы в статистике — лишь подсказки по вашим записям.
 - `androidx.health.connect:connect-client` закреплена на `1.1.0-beta01`: более новые версии требуют compileSdk 36 и AGP 8.9.1+.
+
+## Лицензия
+[MIT](LICENSE). Используются данные Open-Meteo.com (CC BY 4.0), MET Norway и OpenStreetMap Nominatim: при своём
+использовании соблюдайте условия этих сервисов.
