@@ -34,8 +34,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.headachediary.app.R
+import com.headachediary.app.data.DayFactor
+import com.headachediary.app.data.DayFactors
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.data.MIN_DAYS_PER_GROUP
 import com.headachediary.app.data.SHORT_SLEEP_MINUTES
+import com.headachediary.app.data.computeFactorResults
 import com.headachediary.app.data.computeStats
 import com.headachediary.app.health.HealthBaseline
 import com.headachediary.app.health.HealthService
@@ -47,7 +51,12 @@ import java.time.LocalDate
 import kotlin.math.roundToInt
 
 @Composable
-fun StatsScreen(entries: List<HeadacheEntry>, painFreeDays: Set<Long>, modifier: Modifier = Modifier) {
+fun StatsScreen(
+    entries: List<HeadacheEntry>,
+    painFreeDays: Set<Long>,
+    dayFactors: Map<Long, DayFactors>,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     var days by rememberSaveable { mutableIntStateOf(30) }
     var showReport by remember { mutableStateOf(false) }
@@ -109,6 +118,8 @@ fun StatsScreen(entries: List<HeadacheEntry>, painFreeDays: Set<Long>, modifier:
         PainBars(entries)
         WeatherCard(entries, windowDays = minOf(days, WeatherClient.MAX_PAST_DAYS))
         HealthCard(entries, windowDays = minOf(days, WeatherClient.MAX_PAST_DAYS))
+        CycleCard(entries, windowDays = minOf(days, WeatherClient.MAX_PAST_DAYS))
+        FactorsStatsCard(entries, dayFactors, days)
         RankCard(
             stringResource(R.string.rank_triggers),
             stats.topTriggers.map { (t, n) -> context.getString(t.labelRes) to n },
@@ -271,6 +282,125 @@ private fun WeatherCard(entries: List<HeadacheEntry>, windowDays: Int) {
 }
 
 private const val MIN_ATTACKS_FOR_VERDICT = 5
+
+/** Доля дней околоменструального окна за период; null — данных о цикле нет. */
+private data class CycleBaselineState(val share: Double?)
+
+/** Приступы в околоменструальном окне против доли таких дней в обычном цикле (даты берутся из Health Connect). */
+@Composable
+private fun CycleCard(entries: List<HeadacheEntry>, windowDays: Int) {
+    val context = LocalContext.current
+    val enabled = AppSettings.cycleEnabled(context)
+    val since = System.currentTimeMillis() - windowDays * DAY_MS
+    val withCycle = entries.filter { it.startTime >= since && it.perimenstrual != null }
+    if (!enabled && withCycle.isEmpty()) return
+
+    val baselineState by produceState<CycleBaselineState?>(null, windowDays, enabled, withCycle.size) {
+        value = null
+        value = CycleBaselineState(if (enabled) HealthService.cycleBaseline(context, windowDays) else null)
+    }
+    val usual = baselineState?.share
+
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.cycle_stats_title), style = MaterialTheme.typography.titleMedium)
+            if (withCycle.isEmpty()) {
+                Text(
+                    stringResource(R.string.cycle_stats_no_data),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                return@Column
+            }
+            val inWindow = withCycle.count { it.perimenstrual == true }
+            val share = inWindow.toDouble() / withCycle.size
+            Text(
+                stringResource(R.string.cycle_stats_attacks, inWindow, withCycle.size, (share * 100).roundToInt()),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            if (usual != null) {
+                Text(
+                    stringResource(R.string.cycle_stats_baseline, (usual * 100).roundToInt()),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            val verdict = when {
+                withCycle.size < MIN_ATTACKS_FOR_VERDICT -> R.string.cycle_verdict_few
+                usual == null -> null
+                share >= 0.4 && share >= 1.5 * usual -> R.string.cycle_verdict_more
+                else -> R.string.cycle_verdict_none
+            }
+            if (verdict != null) {
+                Text(
+                    stringResource(verdict),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+            Text(
+                stringResource(R.string.cycle_stats_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** Сравнение дней с болью и без неё по отмеченным факторам дня (стресс, кофеин, алкоголь, вода, еда). */
+@Composable
+private fun FactorsStatsCard(entries: List<HeadacheEntry>, dayFactors: Map<Long, DayFactors>, days: Int) {
+    val sinceDay = (System.currentTimeMillis() - days * DAY_MS).toLocalDate().toEpochDay()
+    val logged = dayFactors.values.filter { it.day >= sinceDay }
+    val painDays = entries.map { it.startTime.toLocalDate().toEpochDay() }.toSet()
+    val results = computeFactorResults(logged, painDays).take(3)
+
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.factors_stats_title), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.factors_stats_logged, logged.size),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (results.isEmpty()) {
+                Text(
+                    stringResource(R.string.factors_stats_no_data, MIN_DAYS_PER_GROUP),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            results.forEach { r ->
+                Text(
+                    stringResource(
+                        R.string.factors_stats_row,
+                        stringResource(factorLabelRes(r.factor)),
+                        (r.shareWith * 100).roundToInt(),
+                        (r.shareWithout * 100).roundToInt(),
+                        r.daysWith,
+                        r.daysWithout,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Text(
+                stringResource(R.string.factors_stats_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@androidx.annotation.StringRes
+private fun factorLabelRes(factor: DayFactor): Int = when (factor) {
+    DayFactor.HIGH_STRESS -> R.string.factor_high_stress
+    DayFactor.MODERATE_STRESS -> R.string.factor_moderate_stress
+    DayFactor.CAFFEINE -> R.string.factor_caffeine
+    DayFactor.ALCOHOL -> R.string.factors_alcohol
+    DayFactor.LOW_WATER -> R.string.factors_low_water
+    DayFactor.SKIPPED_MEAL -> R.string.factors_skipped_meal
+}
 
 /** Результат расчёта «обычного фона»; null внутри — данных нет. */
 private data class HealthBaselineState(val value: HealthBaseline?)

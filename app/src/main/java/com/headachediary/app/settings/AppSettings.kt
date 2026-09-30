@@ -15,7 +15,9 @@ enum class ThemeMode(val key: String) {
 enum class AppLanguage(val key: String) {
     SYSTEM("system"),
     RU("ru"),
+    UK("uk"),
     EN("en"),
+    DE("de"),
 }
 
 enum class PressureUnit(val key: String, @StringRes val labelRes: Int) {
@@ -30,6 +32,11 @@ object AppSettings {
     private const val KEY_LANGUAGE = "language"
     private const val KEY_WEATHER = "weather"
     private const val KEY_PRESSURE_UNIT = "pressure_unit"
+    private const val KEY_LOCK = "lock"
+    private const val KEY_BACKUP_FOLDER = "backup_folder"
+    private const val KEY_BACKUP_TIME = "backup_time"
+    private const val KEY_BACKUP_OK = "backup_ok"
+    private const val KEY_CYCLE = "cycle"
     private const val KEY_HEALTH = "health"
     private const val KEY_REMINDER = "reminder"
     private const val KEY_REMINDER_MINUTES = "reminder_minutes"
@@ -59,6 +66,46 @@ object AppSettings {
 
     fun setWeatherEnabled(context: Context, enabled: Boolean) {
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_WEATHER, enabled).apply()
+    }
+
+    /** Требовать ли отпечаток или код экрана блокировки при открытии приложения. */
+    fun lockEnabled(context: Context): Boolean =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getBoolean(KEY_LOCK, false)
+
+    fun setLockEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_LOCK, enabled).apply()
+    }
+
+    /** Папка для автоматических копий (адрес дерева документов Android); null — автокопия выключена. */
+    fun autoBackupFolder(context: Context): String? =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString(KEY_BACKUP_FOLDER, null)
+
+    fun setAutoBackupFolder(context: Context, uri: String?) {
+        val editor = context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit()
+        if (uri == null) editor.remove(KEY_BACKUP_FOLDER) else editor.putString(KEY_BACKUP_FOLDER, uri)
+        editor.apply()
+    }
+
+    /** Время последней попытки автокопии и её успех; 0 — попыток ещё не было. */
+    fun autoBackupLastTime(context: Context): Long =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getLong(KEY_BACKUP_TIME, 0L)
+
+    fun autoBackupLastOk(context: Context): Boolean =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getBoolean(KEY_BACKUP_OK, false)
+
+    fun setAutoBackupResult(context: Context, time: Long, ok: Boolean) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit()
+            .putLong(KEY_BACKUP_TIME, time)
+            .putBoolean(KEY_BACKUP_OK, ok)
+            .apply()
+    }
+
+    /** Учитывать ли цикл (даты менструаций из Health Connect); по умолчанию выключено. */
+    fun cycleEnabled(context: Context): Boolean =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getBoolean(KEY_CYCLE, false)
+
+    fun setCycleEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_CYCLE, enabled).apply()
     }
 
     /** Подтягивать ли сон, шаги и пульс в покое из Health Connect. */
@@ -93,11 +140,12 @@ object AppSettings {
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_FORECAST_ALERT, enabled).apply()
     }
 
-    /** Единицы давления; если не выбраны, для русского языка — мм рт. ст., для остальных — гПа. */
+    /** Единицы давления; если не выбраны, для русского и украинского — мм рт. ст., для остальных — гПа. */
     fun pressureUnit(context: Context): PressureUnit {
         val key = context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString(KEY_PRESSURE_UNIT, null)
         PressureUnit.entries.firstOrNull { it.key == key }?.let { return it }
-        return if (context.resources.configuration.locales[0].language == "ru") PressureUnit.MMHG else PressureUnit.HPA
+        val language = context.resources.configuration.locales[0].language
+        return if (language == "ru" || language == "uk") PressureUnit.MMHG else PressureUnit.HPA
     }
 
     fun setPressureUnit(context: Context, unit: PressureUnit) {

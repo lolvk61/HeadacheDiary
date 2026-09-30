@@ -1,0 +1,433 @@
+<resources>
+    <string name="app_name">Kopfschmerz-Tagebuch</string>
+    <string name="widget_description">Ein Tipp, um Beginn oder Ende von Kopfschmerzen festzuhalten</string>
+
+    <!-- Common -->
+    <string name="back">Zurück</string>
+    <string name="delete">Löschen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="save">Speichern</string>
+
+    <!-- Tabs -->
+    <string name="tab_journal">Journal</string>
+    <string name="tab_calendar">Kalender</string>
+    <string name="tab_stats">Statistik</string>
+    <string name="tab_settings">Einstellungen</string>
+
+    <!-- Headache types -->
+    <string name="type_migraine">Migräne</string>
+    <string name="type_tension">Gewöhnlicher Kopfschmerz</string>
+    <string name="type_unknown">Art nicht angegeben</string>
+
+    <!-- Symptom groups -->
+    <string name="group_migraine">Eher typisch für Migräne</string>
+    <string name="group_tension">Eher typisch für gewöhnlichen Kopfschmerz</string>
+    <string name="group_common">Sonstiges</string>
+
+    <!-- Symptoms -->
+    <string name="sym_pulsating">Pochender Schmerz</string>
+    <string name="sym_one_sided">Schmerz auf einer Seite</string>
+    <string name="sym_nausea">Übelkeit</string>
+    <string name="sym_vomiting">Erbrechen</string>
+    <string name="sym_photophobia">Lichtempfindlichkeit</string>
+    <string name="sym_phonophobia">Lärmempfindlichkeit</string>
+    <string name="sym_smell">Geruchsempfindlichkeit</string>
+    <string name="sym_aura">Aura (Flimmern, Flecken, Taubheit)</string>
+    <string name="sym_worse_movement">Schlimmer bei Bewegung</string>
+    <string name="sym_pressing">Drückend, wie ein Band um den Kopf</string>
+    <string name="sym_both_sides">Schmerz auf beiden Seiten</string>
+    <string name="sym_mild">Leicht bis mittel</string>
+    <string name="sym_neck_tension">Verspannung in Nacken und Schultern</string>
+    <string name="sym_not_worse_movement">Nicht schlimmer bei Bewegung</string>
+    <string name="sym_dizziness">Schwindel</string>
+    <string name="sym_fatigue">Erschöpfung</string>
+    <string name="sym_irritability">Gereiztheit</string>
+    <string name="sym_concentration">Konzentrationsprobleme</string>
+    <string name="sym_eye_pain">Schmerz hinter dem Auge</string>
+
+    <!-- Triggers -->
+    <string name="trg_sleep">Zu wenig oder zu viel Schlaf</string>
+    <string name="trg_stress">Stress</string>
+    <string name="trg_alcohol">Alkohol</string>
+    <string name="trg_caffeine">Koffein</string>
+    <string name="trg_skipped_meal">Ausgelassene Mahlzeit</string>
+    <string name="trg_dehydration">Zu wenig getrunken</string>
+    <string name="trg_weather">Wetter</string>
+    <string name="trg_menstruation">Menstruation</string>
+    <string name="trg_bright_light">Helles Licht</string>
+    <string name="trg_screen">Lange Bildschirmzeit</string>
+    <string name="trg_smells">Starke Gerüche</string>
+    <string name="trg_food">Bestimmte Speisen</string>
+    <string name="trg_physical">Körperliche Anstrengung</string>
+
+    <!-- Medication effect -->
+    <string name="med_yes">Hat geholfen</string>
+    <string name="med_partly">Teilweise</string>
+    <string name="med_no">Hat nicht geholfen</string>
+
+    <!-- Intensity -->
+    <string name="intensity_none">Stärke nicht angegeben</string>
+    <string name="intensity_weak">Leicht</string>
+    <string name="intensity_medium">Mittel</string>
+    <string name="intensity_strong">Stark</string>
+    <string name="intensity_very_strong">Sehr stark</string>
+    <string name="intensity_hint">Schieberegler bewegen</string>
+    <string name="intensity_of_10">von 10</string>
+
+    <!-- Durations -->
+    <string name="duration_min">%1$d Min.</string>
+    <string name="duration_h">%1$d Std.</string>
+    <string name="duration_h_min">%1$d Std. %2$d Min.</string>
+
+    <!-- Journal -->
+    <string name="journal_greeting">Wie fühlen Sie sich?</string>
+    <string name="hero_pain_title">Kopfschmerzen</string>
+    <string name="hero_pain_subtitle">Tippen, um die Uhrzeit sofort zu speichern</string>
+    <string name="hero_ongoing_title">Anfall läuft</string>
+    <string name="hero_ongoing_subtitle">Seit %1$s · schon %2$s</string>
+    <string name="hero_end">Schmerz vorbei</string>
+    <string name="hero_details">Details hinzufügen</string>
+    <string name="tile_pain_days_30">Schmerztage, 30 T.</string>
+    <string name="tile_migraine_days">Migränetage</string>
+    <string name="tile_pain_free_days">Tage ohne Schmerz</string>
+    <string name="journal_history">Verlauf</string>
+    <string name="week_title">Letzte 7 Tage</string>
+    <string name="empty_title">Noch keine Einträge</string>
+    <string name="empty_body">Wenn Kopfschmerzen beginnen, tippen Sie oben auf die rote Schaltfläche – die Uhrzeit wird automatisch gespeichert. Hier erscheinen dann Verlauf, Statistik und Kalender.</string>
+
+    <!-- Entry card -->
+    <string name="entry_since">ab %1$s</string>
+    <string name="entry_and_more">%1$s und %2$d weitere</string>
+    <string name="entry_medication">Medikament: %1$s</string>
+
+    <!-- Editor -->
+    <string name="editor_title">Kopfschmerz-Eintrag</string>
+    <string name="section_time">Zeit</string>
+    <string name="time_started">Begonnen</string>
+    <string name="time_ended">Beendet</string>
+    <string name="time_still_hurts">tut noch weh</string>
+    <string name="time_change">Ändern</string>
+    <string name="btn_ended_now">Gerade vorbei</string>
+    <string name="btn_still_hurts">Tut noch weh</string>
+    <string name="err_end_before_start">Das Ende liegt vor dem Beginn und wird nicht gespeichert.</string>
+    <string name="duration_label">Dauer: %1$s</string>
+    <string name="section_type">Art des Kopfschmerzes</string>
+    <string name="section_intensity">Stärke</string>
+    <string name="section_symptoms">Symptome</string>
+    <string name="section_triggers">Mögliche Auslöser</string>
+    <string name="section_medication">Medikament</string>
+    <string name="med_hint">Was und in welcher Dosis eingenommen</string>
+    <string name="section_notes">Notizen</string>
+    <string name="delete_title">Eintrag löschen?</string>
+    <string name="delete_text">Das kann nicht rückgängig gemacht werden.</string>
+
+    <!-- Calendar -->
+    <string name="cal_title">Kalender</string>
+    <string name="cal_month_none">Keine Kopfschmerztage in diesem Monat</string>
+    <string name="cal_month_count">Kopfschmerztage in diesem Monat: %1$d</string>
+    <string name="cal_prev">Vorheriger Monat</string>
+    <string name="cal_next">Nächster Monat</string>
+    <string name="legend_weak">leicht</string>
+    <string name="legend_medium">mittel</string>
+    <string name="legend_strong">stark</string>
+    <string name="legend_migraine">M – Migräne</string>
+    <string name="cal_migraine_letter">M</string>
+    <string name="cal_no_pain">An diesem Tag sind keine Kopfschmerzen eingetragen.</string>
+    <string name="cal_add_for_day">Eintrag für diesen Tag hinzufügen</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Statistik</string>
+    <string name="period_30">30 Tage</string>
+    <string name="period_90">90 Tage</string>
+    <string name="period_year">Jahr</string>
+    <string name="period_all">Gesamte Zeit</string>
+    <string name="stat_pain_days">Kopfschmerztage</string>
+    <string name="stat_migraine_days">Migränetage</string>
+    <string name="stat_tension_days">Tage mit gewöhnlichem Kopfschmerz</string>
+    <string name="stat_avg_intensity">Durchschnittliche Stärke</string>
+    <string name="stat_avg_duration">Durchschnittliche Dauer</string>
+    <string name="stat_med_days">Tage mit Medikament</string>
+    <string name="warn_med_overuse">In diesem Monat wurden an 10 oder mehr Tagen Schmerzmittel genommen. Häufiger Gebrauch kann Kopfschmerzen selbst verstärken – besprechen Sie das mit einer Ärztin oder einem Arzt.</string>
+    <string name="bars_title">Stärke pro Tag</string>
+    <string name="bars_subtitle">Letzte 30 Tage</string>
+    <string name="bars_30_ago">vor 30 Tagen</string>
+    <string name="bars_today">heute</string>
+    <string name="rank_triggers">Häufige Auslöser</string>
+    <string name="rank_symptoms">Häufige Symptome</string>
+    <string name="rank_no_data">Für den gewählten Zeitraum gibt es noch keine Daten.</string>
+    <string name="btn_doctor_report">Bericht für die Ärztin oder den Arzt</string>
+    <string name="disclaimer">Die App führt ein Tagebuch und ersetzt keine ärztliche Beratung.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_appearance">Darstellung</string>
+    <string name="settings_theme">Design</string>
+    <string name="theme_system">Wie System</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="settings_language">Sprache</string>
+    <string name="lang_system">Wie System</string>
+    <string name="settings_data">Daten</string>
+    <string name="action_doctor_report">Bericht für die Ärztin oder den Arzt (PDF)</string>
+    <string name="action_doctor_report_desc">Eine verständliche Zusammenfassung und eine Liste der Anfälle für den gewählten Zeitraum, zum Zeigen oder Senden</string>
+    <string name="action_backup">Sicherung speichern</string>
+    <string name="action_backup_desc">Eine Datei mit allen Einträgen zum Aufbewahren oder für ein anderes Handy</string>
+    <string name="action_restore">Aus Sicherung wiederherstellen</string>
+    <string name="action_restore_desc">Fügt Einträge aus einer Sicherungsdatei hinzu. Vorhandene Einträge werden nicht doppelt angelegt</string>
+    <string name="backup_saved">Sicherung gespeichert</string>
+    <string name="backup_failed">Datei konnte nicht gespeichert werden</string>
+    <string name="import_done">Einträge hinzugefügt: %1$d, Duplikate übersprungen: %2$d</string>
+    <string name="import_failed">Datei konnte nicht gelesen werden. Wählen Sie eine Sicherung, die diese App erstellt hat.</string>
+    <string name="settings_about">Über die App</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_privacy">Alle Einträge werden nur auf diesem Handy gespeichert und nirgendwohin gesendet, solange Sie nicht selbst einen Bericht oder eine Sicherung teilen. Wenn Sie die Wetteraufzeichnung einschalten, werden nur ungefähre Koordinaten an einen Wetterdienst gesendet.</string>
+    <string name="about_weather_source">Wetterdaten: Open-Meteo.com, als Ersatz MET Norway (api.met.no). Ortssuche: Open-Meteo und OpenStreetMap.</string>
+
+    <!-- Doctor report -->
+    <string name="report_dialog_title">Bericht für die Ärztin oder den Arzt</string>
+    <string name="report_dialog_text">Welchen Zeitraum soll das PDF umfassen?</string>
+    <string name="report_create">Erstellen</string>
+    <string name="report_creating">Wird erstellt …</string>
+    <string name="report_empty">Für den gewählten Zeitraum gibt es keine Einträge</string>
+    <string name="report_failed">Bericht konnte nicht erstellt werden</string>
+    <string name="report_share">Bericht senden</string>
+    <string name="report_title">Kopfschmerz-Tagebuch</string>
+    <string name="report_period">Zeitraum: %1$s – %2$s (%3$d Tage)</string>
+    <string name="report_generated">Erstellt am %1$s</string>
+    <string name="report_summary">Zusammenfassung</string>
+    <string name="report_pain_days">Tage mit Kopfschmerz: %1$d von %2$d</string>
+    <string name="report_attacks">Anzahl der Anfälle: %1$d</string>
+    <string name="report_migraine_days">Tage mit Migräne: %1$d</string>
+    <string name="report_tension_days">Tage mit gewöhnlichem Kopfschmerz: %1$d</string>
+    <string name="report_avg_intensity">Durchschnittliche Stärke: %1$s von 10</string>
+    <string name="report_avg_duration">Durchschnittliche Dauer eines Anfalls: %1$s</string>
+    <string name="report_med_days">Tage mit Medikamenteneinnahme: %1$d</string>
+    <string name="report_frequent_triggers">Häufigste Auslöser: %1$s</string>
+    <string name="report_frequent_symptoms">Häufigste Symptome: %1$s</string>
+    <string name="report_med_note">Hinweis: In den letzten 30 Tagen wurden an 10 oder mehr Tagen Schmerzmittel genommen.</string>
+    <string name="report_episodes">Anfälle in zeitlicher Reihenfolge</string>
+    <string name="report_end_unknown">ab %1$s, Ende nicht eingetragen</string>
+    <string name="report_intensity">Stärke %1$d von 10 (%2$s)</string>
+    <string name="report_intensity_unknown">Stärke nicht eingetragen</string>
+    <string name="report_symptoms">Symptome: %1$s</string>
+    <string name="report_triggers">Mögliche Auslöser: %1$s</string>
+    <string name="report_medication">Medikament: %1$s</string>
+    <string name="report_notes">Notizen: %1$s</string>
+    <string name="report_page">Seite %1$d</string>
+    <string name="report_disclaimer">Dieser Bericht beruht auf den eigenen Tagebucheinträgen der Patientin oder des Patienten und ist kein ärztliches Gutachten.</string>
+
+    <!-- Widget -->
+    <string name="widget_status_ongoing">Anfall seit %1$s</string>
+    <string name="widget_status_last">Zuletzt: %1$s</string>
+    <string name="widget_status_hint">Tippen, wenn Kopfschmerzen beginnen</string>
+    <string name="toast_started">Eingetragen: Kopfschmerz ab %1$s</string>
+    <string name="toast_ended">Schmerz vorbei. Dauer: %1$s</string>
+
+    <!-- Weather: settings -->
+    <string name="settings_weather">Wetter und Luftdruck</string>
+    <string name="weather_switch">Wetter bei jedem Anfall aufzeichnen</string>
+    <string name="weather_switch_desc">Nutzt Ihren ungefähren Standort und den kostenlosen Dienst Open-Meteo, um Temperatur und Luftdruck zum Zeitpunkt eines Anfalls zu speichern. Es werden nur auf etwa 1 km gerundete Koordinaten gesendet, niemals Ihre Einträge.</string>
+    <string name="weather_permission_denied">Kein Zugriff auf Ihren Standort. Geben Sie stattdessen unten Ihre Stadt ein.</string>
+    <string name="weather_city_hint">Stadt</string>
+    <string name="weather_city_find">Suchen</string>
+    <string name="weather_city_set">Verwendete Stadt: %1$s</string>
+    <string name="weather_city_not_found">Stadt nicht gefunden</string>
+    <string name="weather_city_use_location">Stattdessen meinen Standort verwenden</string>
+    <string name="weather_location_ok">Standort ist festgelegt (ungefähr)</string>
+    <string name="weather_location_none">Standort noch nicht bestimmt. Öffnen Sie die App mit eingeschaltetem Standort</string>
+    <string name="pressure_unit">Einheit des Luftdrucks</string>
+    <string name="unit_mmhg">mmHg</string>
+    <string name="unit_hpa">hPa</string>
+
+    <!-- Weather: editor -->
+    <string name="section_weather">Wetter zu dieser Zeit</string>
+    <string name="weather_temperature">Temperatur</string>
+    <string name="weather_conditions">Wetterlage</string>
+    <string name="weather_pressure">Luftdruck</string>
+    <string name="weather_change_3h">Änderung in 3 Std.</string>
+    <string name="weather_change_24h">Änderung in 24 Std.</string>
+    <string name="weather_humidity">Luftfeuchtigkeit</string>
+    <string name="weather_none">Für diesen Eintrag wurde noch kein Wetter aufgezeichnet.</string>
+    <string name="weather_refresh">Wetter aktualisieren</string>
+    <string name="weather_loading">Wird geladen …</string>
+    <string name="weather_no_location">Standort konnte nicht bestimmt werden. Schalten Sie den Standort am Handy ein oder geben Sie in den Einstellungen Ihre Stadt an.</string>
+    <string name="weather_no_network">Der Wetterdienst ist nicht erreichbar. Prüfen Sie die Internetverbindung.</string>
+
+    <!-- Weather conditions -->
+    <string name="wx_clear">Klar</string>
+    <string name="wx_partly">Teils bewölkt</string>
+    <string name="wx_cloudy">Bedeckt</string>
+    <string name="wx_fog">Nebel</string>
+    <string name="wx_drizzle">Nieselregen</string>
+    <string name="wx_rain">Regen</string>
+    <string name="wx_snow">Schnee</string>
+    <string name="wx_thunder">Gewitter</string>
+
+    <!-- Weather: statistics -->
+    <string name="weather_stats_title">Wetter und Luftdruck</string>
+    <string name="weather_stats_no_data">Für diesen Zeitraum gibt es noch keine Anfälle mit Wetterdaten. Schalten Sie die Wetteraufzeichnung in den Einstellungen ein.</string>
+    <string name="weather_stats_attacks">Anfälle mit Wetterdaten in den letzten %2$d Tagen: %1$d</string>
+    <string name="weather_stats_avg_pressure">Durchschnittlicher Luftdruck bei Anfällen: %1$s</string>
+    <string name="weather_stats_sharp">Vor %1$d von %2$d Anfällen änderte sich der Luftdruck innerhalb von 3 Stunden um 3 hPa (etwa 2 mmHg) oder mehr (%3$d%%)</string>
+    <string name="weather_stats_baseline">Zum Vergleich: Solche Schwankungen gibt es in %1$d%% aller Stunden im selben Zeitraum</string>
+    <string name="weather_stats_baseline_loading">Vergleich mit dem üblichen Wetter …</string>
+    <string name="weather_stats_verdict_few">Noch zu wenige Daten: Es werden mindestens 5 Einträge mit Wetter benötigt.</string>
+    <string name="weather_stats_verdict_more">Laut Ihren Einträgen treten Anfälle bei Luftdruckschwankungen deutlich häufiger auf als sonst. Vielleicht sind Sie wetterfühlig – besprechen Sie das mit einer Ärztin oder einem Arzt.</string>
+    <string name="weather_stats_verdict_none">Bisher ist kein klarer Zusammenhang zwischen Anfällen und Luftdruckschwankungen erkennbar.</string>
+    <string name="weather_stats_note">Das ist nur ein statistischer Hinweis aus Ihren eigenen Einträgen, keine Diagnose.</string>
+
+    <!-- Pain-free days -->
+    <string name="journal_today_ask">Heute schmerzfrei?</string>
+    <string name="journal_today_marked">Heute ist als schmerzfrei markiert</string>
+    <string name="journal_mark_pain_free">Markieren</string>
+    <string name="undo">Rückgängig</string>
+    <string name="legend_pain_free">schmerzfrei</string>
+    <string name="cal_marked_pain_free">Dieser Tag ist als schmerzfrei markiert.</string>
+    <string name="cal_mark_pain_free">Als schmerzfrei markieren</string>
+    <string name="cal_unmark">Markierung entfernen</string>
+    <string name="stat_tracked">Erfasste Tage: %1$d (Kopfschmerz: %2$d, schmerzfrei: %3$d)</string>
+    <string name="report_pain_free_days">Als schmerzfrei markierte Tage: %1$d</string>
+    <string name="toast_pain_free_marked">Markiert: heute keine Kopfschmerzen</string>
+
+    <!-- Reminders and pressure alerts -->
+    <string name="settings_reminders">Erinnerungen und Warnungen</string>
+    <string name="reminder_switch">Abendliche Erinnerung</string>
+    <string name="reminder_switch_desc">Fragt, ob Sie heute Kopfschmerzen hatten, damit auch schmerzfreie Tage erfasst werden. Sie kommt nicht, wenn der Tag schon eingetragen ist.</string>
+    <string name="reminder_time">Uhrzeit: %1$s (zum Ändern tippen)</string>
+    <string name="forecast_switch">Vor Luftdruckschwankungen warnen</string>
+    <string name="forecast_switch_desc">Prüft jeden Morgen die Vorhersage und warnt, wenn eine starke Luftdruckänderung erwartet wird. Zeigen Ihre Einträge, dass solche Schwankungen selten vor Ihren Anfällen auftraten, bleibt die App still. Die Wetteraufzeichnung muss eingeschaltet sein.</string>
+    <string name="forecast_needs_weather">Schalten Sie zuerst die Wetteraufzeichnung ein</string>
+    <string name="notif_permission_denied">Benachrichtigungen sind blockiert. Erlauben Sie sie in den Handy-Einstellungen, um Erinnerungen zu erhalten.</string>
+    <string name="ch_reminder">Abendliche Erinnerung</string>
+    <string name="ch_forecast">Luftdruck-Warnungen</string>
+    <string name="reminder_title">Wie war Ihr Tag?</string>
+    <string name="reminder_text">Hatten Sie heute Kopfschmerzen?</string>
+    <string name="action_no_pain">Keine Schmerzen</string>
+    <string name="action_had_pain">Hatte Schmerzen</string>
+    <string name="alert_title">Luftdruckschwankung erwartet</string>
+    <string name="alert_fall">Gegen %2$s soll der Luftdruck innerhalb von 3 Stunden um etwa %1$s fallen.</string>
+    <string name="alert_rise">Gegen %2$s soll der Luftdruck innerhalb von 3 Stunden um etwa %1$s steigen.</string>
+    <string name="alert_personal">Vor %1$d Ihrer %2$d Anfälle mit Wetterdaten gab es solche Schwankungen – achten Sie heute besonders auf sich.</string>
+    <string name="alert_generic">Manche Menschen bekommen bei solchen Schwankungen Kopfschmerzen – achten Sie auf Ihr Befinden.</string>
+    <string name="alert_unlikely">Laut Ihren Einträgen gingen solche Schwankungen Ihren Anfällen selten voraus – vielleicht betrifft es Sie nicht.</string>
+    <string name="outlook_swing_title">In den nächsten 24 Stunden wird eine Luftdruckschwankung erwartet</string>
+    <string name="outlook_calm_title">Luftdruck-Ausblick</string>
+    <string name="outlook_calm_text">Der Luftdruck bleibt in den nächsten 24 Stunden voraussichtlich stabil.</string>
+
+    <!-- Health Connect -->
+    <string name="section_health">Schlaf und Aktivität</string>
+    <string name="health_sleep">Schlaf vor dem Anfall</string>
+    <string name="health_steps">Schritte in den 24 Std. davor</string>
+    <string name="health_resting_hr">Ruhepuls</string>
+    <string name="health_bpm">%1$d Schläge/Min.</string>
+    <string name="health_none">Für diesen Eintrag liegen noch keine Uhrdaten vor. Sie können nach der Synchronisierung der Uhr erscheinen.</string>
+    <string name="health_refresh">Uhrdaten aktualisieren</string>
+    <string name="health_failed">Keine Daten gefunden. Prüfen Sie, ob die Uhr mit Health Connect synchronisiert hat und der Zugriff erlaubt ist.</string>
+    <string name="settings_health">Uhrdaten (Health Connect)</string>
+    <string name="health_switch">Schlaf und Aktivität aus Health Connect lesen</string>
+    <string name="health_switch_desc">Fügt jedem Anfall den Schlaf der Nacht, die Schritte und den Ruhepuls hinzu, zum Beispiel von einer Nothing- oder CMF-Uhr, die mit Health Connect synchronisiert. Die App liest diese Daten nur, behält sie auf diesem Handy und sendet sie nirgendwohin.</string>
+    <string name="health_permission_denied">Zugriff auf Health Connect wurde nicht erteilt</string>
+    <string name="health_update_required">Aktualisieren oder installieren Sie zuerst Health Connect in Google Play</string>
+    <string name="health_unavailable">Health Connect ist auf diesem Handy nicht verfügbar</string>
+    <string name="health_rationale_title">Warum die App Health Connect liest</string>
+    <string name="health_rationale_body">Das Kopfschmerz-Tagebuch liest Schlaf, Schritte und Ruhepuls aus Health Connect, um zu zeigen, was vor einem Anfall geschah, und zu prüfen, ob kurze Nächte oder wenig Aktivität mit Ihren Kopfschmerzen zusammenhängen. Die Daten werden nur auf diesem Handy verwendet, nirgendwohin gesendet und nie zurückgeschrieben. Sie können den Zugriff jederzeit in den Health-Connect-Einstellungen widerrufen.</string>
+    <string name="close">Schließen</string>
+    <string name="health_stats_title">Schlaf und Aktivität</string>
+    <string name="health_stats_no_data">Für diesen Zeitraum gibt es noch keine Uhrdaten zu Anfällen. Schalten Sie das Lesen in den Einstellungen ein.</string>
+    <string name="health_stats_avg_sleep">Durchschnittlicher Schlaf vor einem Anfall: %1$s (Anfälle mit Daten: %2$d)</string>
+    <string name="health_stats_short_sleep">Anfälle nach einer Nacht unter 6 Stunden: %1$d von %2$d (%3$d%%)</string>
+    <string name="health_stats_short_baseline">Zum Vergleich: Nächte unter 6 Stunden machen %1$d%% aller Nächte im selben Zeitraum aus</string>
+    <string name="health_verdict_few">Noch zu wenige Daten: Es werden mindestens 5 Anfälle mit Schlafdaten benötigt.</string>
+    <string name="health_verdict_more">Laut Ihren Einträgen folgen Anfälle deutlich häufiger auf kurze Nächte als sonst. Schlaf könnte einer Ihrer Auslöser sein – besprechen Sie das mit einer Ärztin oder einem Arzt.</string>
+    <string name="health_verdict_none">Bisher ist kein klarer Zusammenhang zwischen Anfällen und kurzen Nächten erkennbar.</string>
+    <string name="health_stats_steps">Schritte in den 24 Std. vor einem Anfall: durchschnittlich %1$s (an einem üblichen Tag: %2$s)</string>
+    <string name="health_stats_hr">Ruhepuls vor einem Anfall: durchschnittlich %1$d (üblich: %2$s)</string>
+    <string name="health_stats_note">Das ist nur ein statistischer Hinweis aus Ihren eigenen Einträgen, keine Diagnose.</string>
+
+    <!-- Health Connect: doctor report -->
+    <string name="report_avg_sleep">Durchschnittlicher Schlaf vor einem Anfall: %1$s</string>
+    <string name="report_short_sleep">Anfälle nach einer Nacht unter 6 Stunden: %1$d von %2$d</string>
+    <string name="report_health">Schlaf und Aktivität: %1$s</string>
+    <string name="report_sleep">Schlaf vor dem Anfall %1$s</string>
+    <string name="report_steps">Schritte in den vorherigen 24 Std.: %1$s</string>
+    <string name="report_resting_hr">Ruhepuls: %1$d</string>
+
+    <!-- Weather: doctor report -->
+    <string name="report_sharp_pressure">Anfälle bei einer Luftdruckänderung von 3 hPa oder mehr innerhalb von 3 Stunden: %1$d von %2$d</string>
+    <string name="report_weather">Wetter: %1$s</string>
+    <string name="report_pressure">Luftdruck %1$s</string>
+    <string name="weather_change_inline">in 3 Std.: %1$s</string>
+
+    <!-- App lock -->
+    <string name="settings_privacy">Datenschutz</string>
+    <string name="lock_switch">Entsperren verlangen</string>
+    <string name="lock_switch_desc">Fragt beim Öffnen der App nach Fingerabdruck oder Bildschirmsperre und erneut, wenn sie länger als 30 Sekunden im Hintergrund war. Außerdem wird die App in Screenshots und der Liste zuletzt verwendeter Apps ausgeblendet. Widgets und Schaltflächen in Benachrichtigungen funktionieren ohne Entsperren.</string>
+    <string name="lock_need_screen_lock">Richten Sie zuerst eine Bildschirmsperre am Handy ein</string>
+    <string name="lock_title">Das Kopfschmerz-Tagebuch ist gesperrt</string>
+    <string name="lock_unlock">Entsperren</string>
+    <string name="lock_prompt_title">Tagebuch entsperren</string>
+    <string name="lock_prompt_subtitle">Bestätigen Sie, dass Sie es sind, um das Tagebuch zu öffnen</string>
+
+    <!-- Automatic backup -->
+    <string name="auto_backup_title">Automatische Sicherung in einen Ordner</string>
+    <string name="auto_backup_desc">Speichert jede Nacht eine Sicherungsdatei im gewählten Ordner, zum Beispiel in einem Ordner, den Ihr Cloud-Speicher synchronisiert. Die letzten 7 Dateien werden aufbewahrt.</string>
+    <string name="auto_backup_folder">Ordner: %1$s</string>
+    <string name="auto_backup_last_ok">Letzte Sicherung: %1$s</string>
+    <string name="auto_backup_last_failed">Letzter Versuch fehlgeschlagen: %1$s. Prüfen Sie, ob der Ordner noch existiert.</string>
+    <string name="auto_backup_now">Jetzt sichern</string>
+    <string name="auto_backup_change">Ordner ändern</string>
+    <string name="auto_backup_off">Ausschalten</string>
+    <string name="auto_backup_choose">Ordner wählen</string>
+
+    <!-- Week widget -->
+    <string name="week_widget_description">Die letzten 7 Tage und eine Schaltfläche, um heute als schmerzfrei zu markieren</string>
+    <string name="week_widget_mark">Heute schmerzfrei</string>
+    <string name="week_widget_unmark">Markierung für heute entfernen</string>
+    <string name="week_widget_has_entry">Heute gibt es schon einen Eintrag</string>
+
+    <!-- Day factors -->
+    <string name="factors_title">Faktoren des Tages</string>
+    <string name="factors_fill">Ausfüllen</string>
+    <string name="factors_edit">Ändern</string>
+    <string name="factors_hide">Ausblenden</string>
+    <string name="factors_hint">Markieren Sie, was an diesem Tag zutraf – mit oder ohne Kopfschmerzen. Mit der Zeit vergleicht die App Tage mit und ohne Schmerz.</string>
+    <string name="factors_stress">Stress</string>
+    <string name="stress_none">Keiner</string>
+    <string name="stress_moderate">Mäßig</string>
+    <string name="stress_high">Stark</string>
+    <string name="factors_caffeine">Tassen Kaffee oder andere Koffeingetränke</string>
+    <string name="factors_alcohol">Alkohol</string>
+    <string name="factors_low_water">Wenig getrunken</string>
+    <string name="factors_skipped_meal">Ausgelassene Mahlzeit</string>
+    <string name="factor_high_stress">Starker Stress</string>
+    <string name="factor_moderate_stress">Mäßiger Stress</string>
+    <string name="factor_caffeine">3 oder mehr Koffeingetränke</string>
+    <string name="factors_stats_title">Faktoren des Tages</string>
+    <string name="factors_stats_logged">Ausgefüllte Tage im Zeitraum: %1$d</string>
+    <string name="factors_stats_no_data">Noch zu wenige Daten: Für den Vergleich braucht es mindestens %1$d ausgefüllte Tage mit einem Faktor und ebenso viele ohne.</string>
+    <string name="factors_stats_row">%1$s: Schmerz an %2$d%% dieser Tage (ohne: %3$d%%; %4$d und %5$d Tage)</string>
+    <string name="factors_stats_note">Ein Vergleich Ihrer eigenen Tage, kein Beweis für eine Ursache. Verschiedene Faktoren treten oft zusammen auf.</string>
+
+    <!-- Cycle -->
+    <string name="cycle_switch">Zyklus berücksichtigen</string>
+    <string name="cycle_switch_desc">Liest die Daten der Menstruation aus Health Connect, falls Sie es dafür nutzen, und prüft, ob Anfälle von 2 Tagen vor bis 3 Tage nach Beginn der Periode auftreten. Standardmäßig aus; die Daten bleiben auf diesem Handy.</string>
+    <string name="health_cycle">Um den Beginn der Menstruation</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="cycle_stats_title">Zyklus</string>
+    <string name="cycle_stats_no_data">Für diesen Zeitraum gibt es noch keine Anfälle mit Zyklusdaten.</string>
+    <string name="cycle_stats_attacks">Anfälle von 2 Tagen vor bis 3 Tage nach Beginn der Periode: %1$d von %2$d (%3$d%%)</string>
+    <string name="cycle_stats_baseline">Zum Vergleich: Solche Tage machen %1$d%% aller Tage im selben Zeitraum aus</string>
+    <string name="cycle_verdict_few">Noch zu wenige Daten: Es werden mindestens 5 Anfälle mit Zyklusdaten benötigt.</string>
+    <string name="cycle_verdict_more">Laut Ihren Einträgen liegen Anfälle deutlich häufiger als sonst um den Beginn der Menstruation. Das könnte ein Thema für die Ärztin oder den Arzt sein.</string>
+    <string name="cycle_verdict_none">Bisher ist kein klarer Zusammenhang zwischen Anfällen und Zyklus erkennbar.</string>
+    <string name="cycle_stats_note">Das ist nur ein statistischer Hinweis aus Ihren eigenen Einträgen, keine Diagnose.</string>
+    <string name="report_cycle">Anfälle von 2 Tagen vor bis 3 Tage nach Beginn der Periode: %1$d von %2$d</string>
+
+    <!-- Doctor report chart -->
+    <string name="report_chart_title">Im Zeitraum</string>
+    <string name="report_chart_note">Das Diagramm zeigt die letzten %1$d Tage.</string>
+    <string name="report_chart_legend_pain">Schmerzstärke (0–10)</string>
+    <string name="report_chart_legend_pressure">Luftdruck, %1$s</string>
+    <string name="report_chart_legend_free">schmerzfreier Tag</string>
+</resources>

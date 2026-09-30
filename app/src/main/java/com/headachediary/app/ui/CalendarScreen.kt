@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.headachediary.app.R
+import com.headachediary.app.data.DayFactors
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
 import java.time.DayOfWeek
@@ -58,10 +59,12 @@ import java.time.format.TextStyle as DateTextStyle
 fun CalendarScreen(
     entries: List<HeadacheEntry>,
     painFreeDays: Set<Long>,
+    dayFactors: Map<Long, DayFactors>,
     onOpen: (HeadacheEntry) -> Unit,
     onAddForDate: (LocalDate) -> Unit,
     onMarkPainFree: (Long) -> Unit,
     onUnmarkPainFree: (Long) -> Unit,
+    onSaveFactors: (DayFactors) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -181,6 +184,10 @@ fun CalendarScreen(
                         Text(stringResource(if (marked) R.string.cal_unmark else R.string.cal_mark_pain_free))
                     }
                 }
+            }
+            if (!selected.isAfter(today)) {
+                Spacer(Modifier.height(12.dp))
+                FactorsCard(selectedDay, dayFactors[selectedDay], onSaveFactors)
             }
         }
     }

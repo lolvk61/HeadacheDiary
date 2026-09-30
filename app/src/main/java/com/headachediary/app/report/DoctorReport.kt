@@ -20,6 +20,10 @@ import com.headachediary.app.data.SHORT_SLEEP_MINUTES
 import com.headachediary.app.data.computeStats
 import com.headachediary.app.data.hasSharpPressureChange
 import com.headachediary.app.data.symptomLabels
+import com.headachediary.app.settings.AppSettings
+import com.headachediary.app.settings.PressureUnit
+import com.headachediary.app.weather.WeatherClient
+import com.headachediary.app.weather.WeatherService
 import com.headachediary.app.data.triggerLabels
 import com.headachediary.app.ui.DAY_MS
 import com.headachediary.app.ui.appLocale
@@ -49,7 +53,7 @@ object DoctorReport {
     fun select(entries: List<HeadacheEntry>, days: Int?, now: Long = System.currentTimeMillis()): List<HeadacheEntry> =
         entries.filter { days == null || it.startTime >= now - days * DAY_MS }.sortedBy { it.startTime }
 
-    fun build(context: Context, allEntries: List<HeadacheEntry>, painFreeDays: Set<Long>, days: Int?): File {
+    suspend fun build(context: Context, allEntries: List<HeadacheEntry>, painFreeDays: Set<Long>, days: Int?): File {
         val now = System.currentTimeMillis()
         val list = select(allEntries, days, now)
         require(list.isNotEmpty()) { "No entries in the selected period" }
@@ -141,7 +145,44 @@ object DoctorReport {
             w.paragraph(context.getString(R.string.report_med_note), boldPaint, after = 4f)
         }
 
+        val withCycle = list.filter { it.perimenstrual != null }
+        if (withCycle.isNotEmpty()) {
+            bullet(context.getString(R.string.report_cycle, withCycle.count { it.perimenstrual == true }, withCycle.size))
+        }
+
+        // График: сила боли по дням и (если включена погода) давление; не больше 92 последних дней.
         w.spacer(8f)
+        w.rule()
+        w.paragraph(context.getString(R.string.report_chart_title), headingPaint, after = 4f)
+        val chartDays = minOf(periodDays, WeatherClient.MAX_PAST_DAYS)
+        val chartFrom = today.minusDays(chartDays - 1L)
+        if (periodDays > chartDays) {
+            w.paragraph(context.getString(R.string.report_chart_note, chartDays), mutedPaint, after = 4f)
+        }
+        val strongestByDay = list.groupBy { it.startTime.toLocalDate() }
+            .mapValues { (_, day) -> day.mapNotNull { it.intensity }.maxOrNull() ?: 0 }
+        val unit = AppSettings.pressureUnit(context)
+        val dailyPressure = WeatherService.dailyPressure(context, chartDays)
+        w.chart(
+            ChartData(
+                values = (0 until chartDays).map { strongestByDay[chartFrom.plusDays(it.toLong())] },
+                painFree = (0 until chartDays).map { chartFrom.plusDays(it.toLong()).toEpochDay() in painFreeDays },
+                pressure = dailyPressure?.let { byDay ->
+                    (0 until chartDays).map { i ->
+                        byDay[chartFrom.plusDays(i.toLong())]?.let { hpa -> if (unit == PressureUnit.MMHG) hpa * 0.750062 else hpa }
+                    }
+                },
+                pressureUnit = context.getString(unit.labelRes),
+                fromLabel = formatDate(context, chartFrom),
+                toLabel = formatDate(context, today),
+                legendIntensity = context.getString(R.string.report_chart_legend_pain),
+                legendPressure = context.getString(R.string.report_chart_legend_pressure, context.getString(unit.labelRes)),
+                legendFree = context.getString(R.string.report_chart_legend_free),
+            ),
+            colorFor = { painColor(it).toArgb() },
+        )
+
+        w.spacer(4f)
         w.rule()
         w.paragraph(context.getString(R.string.report_episodes), headingPaint, after = 8f)
 
@@ -244,6 +285,21 @@ object DoctorReport {
         }
 }
 
+/** Данные для графика в отчёте: по одному элементу на каждый день периода. */
+private class ChartData(
+    /** Самая сильная боль за день: null — боли нет, 0 — боль без указанной силы. */
+    val values: List<Int?>,
+    val painFree: List<Boolean>,
+    /** Среднесуточное давление в выбранных единицах; null — погода выключена или недоступна. */
+    val pressure: List<Double?>?,
+    val pressureUnit: String,
+    val fromLabel: String,
+    val toLabel: String,
+    val legendIntensity: String,
+    val legendPressure: String,
+    val legendFree: String,
+)
+
 /** Простая вёрстка текста на страницах A4 с переносом строк и автоматическим переходом на новую страницу. */
 private class PdfWriter(private val doc: PdfDocument, private val pageLabel: String) {
     private val pageW = 595
@@ -315,6 +371,102 @@ private class PdfWriter(private val doc: PdfDocument, private val pageLabel: Str
         needs(10f)
         canvas?.drawLine(margin, y, pageW - margin, y, rulePaint)
         y += 10f
+    }
+
+    private val gridPaint = Paint().apply {
+        color = 0xFFDDDDDD.toInt()
+        strokeWidth = 0.5f
+    }
+    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF1565C0.toInt()
+        strokeWidth = 1.6f
+        style = Paint.Style.STROKE
+    }
+    private val lineLabelPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = 8f
+        color = 0xFF1565C0.toInt()
+    }
+
+    /**
+     * Столбики силы боли по дням (цвет — по силе; зелёная черта — день без боли) и линия среднесуточного давления.
+     * Занимает фиксированную высоту и не разрывается между страницами.
+     */
+    fun chart(data: ChartData, colorFor: (Int?) -> Int) {
+        val plotHeight = 110f
+        needs(plotHeight + 46f)
+        val c = canvas ?: return
+        val left = margin + 26f
+        val right = pageW - margin - 44f
+        val top = y + 6f
+        val bottom = top + plotHeight
+        val n = data.values.size.coerceAtLeast(1)
+
+        for (v in intArrayOf(0, 5, 10)) {
+            val yy = bottom - plotHeight * v / 10f
+            c.drawLine(left, yy, right, yy, gridPaint)
+            c.drawText(v.toString(), margin, yy + 3f, footerPaint)
+        }
+
+        val slot = (right - left) / n
+        val barWidth = (slot * 0.7f).coerceAtLeast(1f)
+        data.values.forEachIndexed { i, strongest ->
+            val x = left + i * slot + (slot - barWidth) / 2
+            if (strongest != null) {
+                // 0 — боль была, но силу не указали: рисуем невысокий серый столбик.
+                val h = if (strongest == 0) plotHeight * 0.25f else plotHeight * strongest / 10f
+                fillPaint.color = colorFor(strongest.takeIf { it > 0 })
+                c.drawRect(x, bottom - h, x + barWidth, bottom, fillPaint)
+            } else if (data.painFree[i]) {
+                fillPaint.color = 0xFF2E7D32.toInt()
+                c.drawRect(x, bottom - 3f, x + barWidth, bottom, fillPaint)
+            }
+        }
+
+        val series = data.pressure
+        val known = series?.filterNotNull().orEmpty()
+        if (series != null && known.size >= 2) {
+            val min = known.min()
+            val max = known.max()
+            val range = (max - min).coerceAtLeast(1.0)
+            var prevX = 0f
+            var prevY = 0f
+            var hasPrev = false
+            series.forEachIndexed { i, p ->
+                if (p == null) {
+                    hasPrev = false
+                } else {
+                    val px = left + i * slot + slot / 2
+                    val py = (bottom - plotHeight * (0.05 + 0.9 * (p - min) / range)).toFloat()
+                    if (hasPrev) c.drawLine(prevX, prevY, px, py, linePaint)
+                    prevX = px
+                    prevY = py
+                    hasPrev = true
+                }
+            }
+            c.drawText(String.format("%.0f %s", max, data.pressureUnit), right + 3f, top + 8f, lineLabelPaint)
+            c.drawText(String.format("%.0f", min), right + 3f, bottom, lineLabelPaint)
+        }
+
+        c.drawText(data.fromLabel, left, bottom + 12f, footerPaint)
+        c.drawText(data.toLabel, right - footerPaint.measureText(data.toLabel), bottom + 12f, footerPaint)
+
+        // Легенда под графиком.
+        var lx = left
+        val ly = bottom + 26f
+        fillPaint.color = colorFor(8)
+        c.drawRect(lx, ly - 7f, lx + 8f, ly, fillPaint)
+        c.drawText(data.legendIntensity, lx + 12f, ly, footerPaint)
+        lx += 12f + footerPaint.measureText(data.legendIntensity) + 14f
+        fillPaint.color = 0xFF2E7D32.toInt()
+        c.drawRect(lx, ly - 7f, lx + 8f, ly, fillPaint)
+        c.drawText(data.legendFree, lx + 12f, ly, footerPaint)
+        lx += 12f + footerPaint.measureText(data.legendFree) + 14f
+        if (known.size >= 2) {
+            c.drawLine(lx, ly - 3f, lx + 10f, ly - 3f, linePaint)
+            c.drawText(data.legendPressure, lx + 14f, ly, footerPaint)
+        }
+        y = bottom + 36f
     }
 
     /** Блок из нескольких строк с цветной полосой слева; не разрывается между страницами. */

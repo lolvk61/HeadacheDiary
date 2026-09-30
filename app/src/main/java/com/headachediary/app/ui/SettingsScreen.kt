@@ -1,7 +1,9 @@
 package com.headachediary.app.ui
 
 import android.Manifest
+import android.app.KeyguardManager
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
@@ -43,6 +45,7 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import com.headachediary.app.MainViewModel
 import com.headachediary.app.R
+import com.headachediary.app.data.AutoBackup
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.health.HealthService
 import com.headachediary.app.reminders.Notifications
@@ -68,10 +71,17 @@ fun SettingsScreen(
     onThemeChange: (ThemeMode) -> Unit,
     language: AppLanguage,
     onLanguageChange: (AppLanguage) -> Unit,
+    lockEnabled: Boolean,
+    onLockChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     var showReport by remember { mutableStateOf(false) }
+    var cycleOn by remember { mutableStateOf(AppSettings.cycleEnabled(context)) }
+    var backupFolderName by remember { mutableStateOf(AutoBackup.folderName(context)) }
+    var backupFolderSet by remember { mutableStateOf(AppSettings.autoBackupFolder(context) != null) }
+    var backupLastTime by remember { mutableStateOf(AppSettings.autoBackupLastTime(context)) }
+    var backupLastOk by remember { mutableStateOf(AppSettings.autoBackupLastOk(context)) }
     var weatherOn by remember { mutableStateOf(AppSettings.weatherEnabled(context)) }
     var pressureUnit by remember { mutableStateOf(AppSettings.pressureUnit(context)) }
     var hasLocation by remember { mutableStateOf(LocationHelper.hasAny(context)) }
@@ -137,7 +147,46 @@ fun SettingsScreen(
         enableWeather()
     }
 
+    fun refreshBackupStatus() {
+        backupFolderSet = AppSettings.autoBackupFolder(context) != null
+        backupFolderName = AutoBackup.folderName(context)
+        backupLastTime = AppSettings.autoBackupLastTime(context)
+        backupLastOk = AppSettings.autoBackupLastOk(context)
+    }
+
+    fun backupNow() {
+        vm.runAutoBackup { ok ->
+            refreshBackupStatus()
+            toast(context.getString(if (ok) R.string.backup_saved else R.string.backup_failed))
+        }
+    }
+
+    val folderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+        if (uri != null) {
+            // Разрешение на папку нужно сохранить: ночная копия делается, когда приложение закрыто.
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+            AppSettings.setAutoBackupFolder(context, uri.toString())
+            ReminderScheduler.scheduleAll(context)
+            refreshBackupStatus()
+            backupNow()
+        }
+    }
+
     var healthOn by remember { mutableStateOf(AppSettings.healthEnabled(context)) }
+    val cycleLauncher = rememberLauncherForActivityResult(
+        PermissionController.createRequestPermissionResultContract(),
+    ) { granted: Set<String> ->
+        if (granted.isEmpty()) {
+            toast(context.getString(R.string.health_permission_denied))
+        } else {
+            AppSettings.setCycleEnabled(context, true)
+            cycleOn = true
+            vm.fillRecentHealth()
+        }
+    }
     val healthLauncher = rememberLauncherForActivityResult(
         PermissionController.createRequestPermissionResultContract(),
     ) { granted: Set<String> ->
@@ -239,6 +288,16 @@ fun SettingsScreen(
                     selected = language == AppLanguage.RU,
                     onClick = { onLanguageChange(AppLanguage.RU) },
                     label = { Text("Русский") },
+                )
+                FilterChip(
+                    selected = language == AppLanguage.UK,
+                    onClick = { onLanguageChange(AppLanguage.UK) },
+                    label = { Text("Українська") },
+                )
+                FilterChip(
+                    selected = language == AppLanguage.DE,
+                    onClick = { onLanguageChange(AppLanguage.DE) },
+                    label = { Text("Deutsch") },
                 )
                 FilterChip(
                     selected = language == AppLanguage.EN,
@@ -373,6 +432,65 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            HorizontalDivider()
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    stringResource(R.string.cycle_switch),
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Switch(
+                    checked = cycleOn,
+                    onCheckedChange = { on ->
+                        if (!on) {
+                            AppSettings.setCycleEnabled(context, false)
+                            cycleOn = false
+                        } else {
+                            when (HealthService.sdkStatus(context)) {
+                                HealthConnectClient.SDK_AVAILABLE -> cycleLauncher.launch(HealthService.cyclePermissions)
+                                HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED ->
+                                    toast(context.getString(R.string.health_update_required))
+                                else -> toast(context.getString(R.string.health_unavailable))
+                            }
+                        }
+                    },
+                )
+            }
+            Text(
+                stringResource(R.string.cycle_switch_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        SectionCard(stringResource(R.string.settings_privacy)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    stringResource(R.string.lock_switch),
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Switch(
+                    checked = lockEnabled,
+                    onCheckedChange = { on ->
+                        val secure = context.getSystemService(KeyguardManager::class.java)?.isDeviceSecure == true
+                        if (on && !secure) toast(context.getString(R.string.lock_need_screen_lock)) else onLockChange(on)
+                    },
+                )
+            }
+            Text(
+                stringResource(R.string.lock_switch_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
 
         SectionCard(stringResource(R.string.settings_reminders)) {
@@ -464,6 +582,50 @@ fun SettingsScreen(
                 stringResource(R.string.action_restore),
                 stringResource(R.string.action_restore_desc),
             ) { importLauncher.launch(arrayOf("*/*")) }
+            HorizontalDivider()
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    stringResource(R.string.auto_backup_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    stringResource(R.string.auto_backup_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (backupFolderSet) {
+                    Text(
+                        stringResource(R.string.auto_backup_folder, backupFolderName ?: "—"),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    if (backupLastTime > 0) {
+                        Text(
+                            stringResource(
+                                if (backupLastOk) R.string.auto_backup_last_ok else R.string.auto_backup_last_failed,
+                                formatDateTime(context, backupLastTime),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (backupLastOk) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        TextButton(onClick = { backupNow() }) { Text(stringResource(R.string.auto_backup_now)) }
+                        TextButton(onClick = { folderLauncher.launch(null) }) {
+                            Text(stringResource(R.string.auto_backup_change))
+                        }
+                        TextButton(onClick = {
+                            AppSettings.setAutoBackupFolder(context, null)
+                            ReminderScheduler.scheduleAll(context)
+                            refreshBackupStatus()
+                        }) { Text(stringResource(R.string.auto_backup_off)) }
+                    }
+                } else {
+                    TextButton(onClick = { folderLauncher.launch(null) }) {
+                        Text(stringResource(R.string.auto_backup_choose))
+                    }
+                }
+            }
         }
 
         SectionCard(stringResource(R.string.settings_about)) {

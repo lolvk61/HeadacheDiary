@@ -8,6 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.math.abs
 
 /** Чем закончилась попытка получить погоду: по этому показываем понятное сообщение об ошибке. */
@@ -105,6 +108,27 @@ object WeatherService {
     }
 
     private const val OUTLOOK_CACHE_MS = 30L * 60 * 1000
+
+    /**
+     * Среднесуточное давление (гПа) по датам за последние [days] дней — для графика в отчёте.
+     * Null, если погода выключена, нет местоположения или сервис недоступен.
+     */
+    suspend fun dailyPressure(context: Context, days: Int): Map<LocalDate, Double>? = withContext(Dispatchers.IO) {
+        if (!AppSettings.weatherEnabled(context)) return@withContext null
+        val coords = LocationHelper.best(context) ?: return@withContext null
+        runCatching {
+            val hourly = WeatherClient.fetchRecent(coords.lat, coords.lon, days)
+            val zone = ZoneId.systemDefault()
+            val byDay = mutableMapOf<LocalDate, MutableList<Double>>()
+            for (i in hourly.times.indices) {
+                val pressure = hourly.pressure[i]
+                if (pressure.isNaN()) continue
+                val date = Instant.ofEpochSecond(hourly.times[i]).atZone(zone).toLocalDate()
+                byDay.getOrPut(date) { mutableListOf() } += pressure
+            }
+            byDay.mapValues { (_, values) -> values.average() }
+        }.onFailure { Log.w(TAG, "Daily pressure request failed", it) }.getOrNull()
+    }
 
     /** Доля «обычных» часов с заметным перепадом давления за последние [days] дней; null — нет данных. */
     suspend fun baselineShare(context: Context, days: Int): Double? = withContext(Dispatchers.IO) {

@@ -3,4 +3,5 @@
     <color name="widget_bg">#F3EDF7</color>
     <color name="widget_text">#1D1B20</color>
     <color name="widget_text_secondary">#49454F</color>
+    <color name="widget_dot_empty">#1F808080</color>
 </resources>

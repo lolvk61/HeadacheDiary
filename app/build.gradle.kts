@@ -1,8 +1,16 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
+}
+
+// Данные для подписи релизной сборки лежат в keystore.properties (в репозиторий не попадает, см. RELEASE.md).
+val keystoreProps = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
 
 android {
@@ -17,9 +25,21 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystoreProps.isNotEmpty()) {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (keystoreProps.isNotEmpty()) signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -50,7 +70,16 @@ dependencies {
     // Более новые версии (1.1.0-beta02 и выше) требуют compileSdk 36 и AGP 8.9.1; beta01 подходит к текущей сборке.
     implementation("androidx.health.connect:connect-client:1.1.0-beta01")
 
+    // Разблокировка отпечатком или кодом экрана блокировки.
+    implementation("androidx.biometric:biometric:1.1.0")
+    // Запись автоматических копий в выбранную папку.
+    implementation("androidx.documentfile:documentfile:1.0.1")
+
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
+
+    testImplementation("junit:junit:4.13.2")
+    // Настоящая реализация org.json для локальных тестов (в android.jar только заглушки).
+    testImplementation("org.json:json:20240303")
 }

@@ -357,4 +357,77 @@
     <string name="report_weather">Weather: %1$s</string>
     <string name="report_pressure">pressure %1$s</string>
     <string name="weather_change_inline">change over 3 h: %1$s</string>
+
+    <!-- App lock -->
+    <string name="settings_privacy">Privacy</string>
+    <string name="lock_switch">Require unlock</string>
+    <string name="lock_switch_desc">Asks for your fingerprint or the phone screen lock when the app is opened, and again after it has been in the background for more than 30 seconds. It also hides the app from screenshots and the recent apps list. Widgets and notification buttons keep working without unlocking.</string>
+    <string name="lock_need_screen_lock">Set up a screen lock on the phone first</string>
+    <string name="lock_title">Headache Diary is locked</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_prompt_title">Unlock Headache Diary</string>
+    <string name="lock_prompt_subtitle">Confirm that it is you to open the diary</string>
+
+    <!-- Automatic backup -->
+    <string name="auto_backup_title">Automatic backup to a folder</string>
+    <string name="auto_backup_desc">Every night saves a backup file into the folder you choose, for example a folder that your cloud drive syncs. The last 7 files are kept.</string>
+    <string name="auto_backup_folder">Folder: %1$s</string>
+    <string name="auto_backup_last_ok">Last backup: %1$s</string>
+    <string name="auto_backup_last_failed">Last attempt failed: %1$s. Check that the folder still exists.</string>
+    <string name="auto_backup_now">Back up now</string>
+    <string name="auto_backup_change">Change folder</string>
+    <string name="auto_backup_off">Turn off</string>
+    <string name="auto_backup_choose">Choose a folder</string>
+
+    <!-- Week widget -->
+    <string name="week_widget_description">The last 7 days and a button to mark today as pain-free</string>
+    <string name="week_widget_mark">No pain today</string>
+    <string name="week_widget_unmark">Remove today\'s mark</string>
+    <string name="week_widget_has_entry">Today already has an entry</string>
+
+    <!-- Day factors -->
+    <string name="factors_title">Factors of the day</string>
+    <string name="factors_fill">Fill in</string>
+    <string name="factors_edit">Edit</string>
+    <string name="factors_hide">Hide</string>
+    <string name="factors_hint">Mark what applies to this day, with or without a headache. Over time the app compares days with and without pain.</string>
+    <string name="factors_stress">Stress</string>
+    <string name="stress_none">None</string>
+    <string name="stress_moderate">Moderate</string>
+    <string name="stress_high">High</string>
+    <string name="factors_caffeine">Cups of coffee or other caffeine drinks</string>
+    <string name="factors_alcohol">Alcohol</string>
+    <string name="factors_low_water">Little water</string>
+    <string name="factors_skipped_meal">Skipped meal</string>
+    <string name="factor_high_stress">High stress</string>
+    <string name="factor_moderate_stress">Moderate stress</string>
+    <string name="factor_caffeine">3 or more caffeine drinks</string>
+    <string name="factors_stats_title">Factors of the day</string>
+    <string name="factors_stats_logged">Days filled in over the period: %1$d</string>
+    <string name="factors_stats_no_data">Not enough data yet: the comparison needs at least %1$d filled-in days with a factor and as many without it.</string>
+    <string name="factors_stats_row">%1$s: pain on %2$d%% of such days (without it: %3$d%%; %4$d and %5$d days)</string>
+    <string name="factors_stats_note">A comparison of your own days, not a proof of cause. Different factors often come together.</string>
+
+    <!-- Cycle -->
+    <string name="cycle_switch">Take the cycle into account</string>
+    <string name="cycle_switch_desc">Reads the dates of menstruation from Health Connect, only if you use it, and checks whether attacks fall 2 days before to 3 days after the start of a period. Off by default; the data stays on this phone.</string>
+    <string name="health_cycle">Around the start of menstruation</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cycle_stats_title">Cycle</string>
+    <string name="cycle_stats_no_data">No attacks with cycle data in this period yet.</string>
+    <string name="cycle_stats_attacks">Attacks within 2 days before to 3 days after the start of a period: %1$d of %2$d (%3$d%%)</string>
+    <string name="cycle_stats_baseline">For comparison, such days make up %1$d%% of all days in the same period</string>
+    <string name="cycle_verdict_few">Not enough data yet: at least 5 attacks with cycle data are needed.</string>
+    <string name="cycle_verdict_more">By your entries, attacks fall around the start of menstruation noticeably more often than usual. It may be worth discussing with a doctor.</string>
+    <string name="cycle_verdict_none">No clear link between attacks and the cycle is visible so far.</string>
+    <string name="cycle_stats_note">This is only a statistical hint from your own entries, not a diagnosis.</string>
+    <string name="report_cycle">Attacks within 2 days before to 3 days after the start of a period: %1$d of %2$d</string>
+
+    <!-- Doctor report chart -->
+    <string name="report_chart_title">Over the period</string>
+    <string name="report_chart_note">The chart shows the last %1$d days.</string>
+    <string name="report_chart_legend_pain">pain intensity (0–10)</string>
+    <string name="report_chart_legend_pressure">pressure, %1$s</string>
+    <string name="report_chart_legend_free">pain-free day</string>
 </resources>

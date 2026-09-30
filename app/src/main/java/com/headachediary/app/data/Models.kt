@@ -36,6 +36,25 @@ data class HeadacheEntry(
     val steps24h: Int? = null,
     /** Последний записанный пульс в покое перед приступом. */
     val restingHeartRate: Int? = null,
+    /** Пришёлся ли приступ на околоменструальное окно (2 дня до начала и 3 после); null — данных о цикле нет. */
+    val perimenstrual: Boolean? = null,
+)
+
+/**
+ * Факторы дня, которые пользователь отметил (для любого дня, не только с болью):
+ * по ним считается, при каких условиях боль случается чаще.
+ * Наличие записи означает, что день заполнялся.
+ */
+@Entity(tableName = "day_factors")
+data class DayFactors(
+    @PrimaryKey val day: Long,
+    /** 0 — нет, 1 — умеренный, 2 — сильный стресс. */
+    val stress: Int = 0,
+    /** Чашек кофе и других напитков с кофеином; 4 означает «4 и больше». */
+    val caffeine: Int = 0,
+    val alcohol: Boolean = false,
+    val lowWater: Boolean = false,
+    val skippedMeal: Boolean = false,
 )
 
 /** Ночь короче этого порога (в минутах) считаем короткой. */

@@ -77,7 +77,7 @@ fun EditorScreen(
 ) {
     val context = LocalContext.current
     val weatherEnabled = AppSettings.weatherEnabled(context)
-    val healthEnabled = AppSettings.healthEnabled(context)
+    val healthEnabled = AppSettings.healthEnabled(context) || AppSettings.cycleEnabled(context)
     var refreshingWeather by remember { mutableStateOf(false) }
     var refreshingHealth by remember { mutableStateOf(false) }
 
@@ -236,7 +236,8 @@ fun EditorScreen(
                 }
             }
 
-            val hasHealth = entry.sleepMinutes != null || entry.steps24h != null || entry.restingHeartRate != null
+            val hasHealth = entry.sleepMinutes != null || entry.steps24h != null ||
+                entry.restingHeartRate != null || entry.perimenstrual != null
             if (healthEnabled || hasHealth) {
                 SectionCard(stringResource(R.string.section_health)) {
                     if (hasHealth) {
@@ -248,6 +249,12 @@ fun EditorScreen(
                         }
                         entry.restingHeartRate?.let {
                             WeatherRow(stringResource(R.string.health_resting_hr), stringResource(R.string.health_bpm, it))
+                        }
+                        entry.perimenstrual?.let {
+                            WeatherRow(
+                                stringResource(R.string.health_cycle),
+                                stringResource(if (it) R.string.yes else R.string.no),
+                            )
                         }
                     } else {
                         Text(

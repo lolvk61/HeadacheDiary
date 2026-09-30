@@ -357,4 +357,77 @@
     <string name="report_weather">Погода: %1$s</string>
     <string name="report_pressure">давление %1$s</string>
     <string name="weather_change_inline">за 3 ч: %1$s</string>
+
+    <!-- App lock -->
+    <string name="settings_privacy">Конфиденциальность</string>
+    <string name="lock_switch">Требовать разблокировку</string>
+    <string name="lock_switch_desc">Просит отпечаток или код экрана блокировки при открытии приложения и повторно, если оно было свёрнуто дольше 30 секунд. Также скрывает приложение из скриншотов и списка недавних. Виджеты и кнопки в уведомлениях работают без разблокировки.</string>
+    <string name="lock_need_screen_lock">Сначала настройте блокировку экрана на телефоне</string>
+    <string name="lock_title">Дневник головной боли заблокирован</string>
+    <string name="lock_unlock">Разблокировать</string>
+    <string name="lock_prompt_title">Разблокировать дневник</string>
+    <string name="lock_prompt_subtitle">Подтвердите, что это вы, чтобы открыть дневник</string>
+
+    <!-- Automatic backup -->
+    <string name="auto_backup_title">Автоматическая копия в папку</string>
+    <string name="auto_backup_desc">Каждую ночь сохраняет файл резервной копии в выбранную папку, например в папку, которую синхронизирует облачный диск. Хранятся 7 последних файлов.</string>
+    <string name="auto_backup_folder">Папка: %1$s</string>
+    <string name="auto_backup_last_ok">Последняя копия: %1$s</string>
+    <string name="auto_backup_last_failed">Последняя попытка не удалась: %1$s. Проверьте, что папка ещё существует.</string>
+    <string name="auto_backup_now">Сделать копию сейчас</string>
+    <string name="auto_backup_change">Сменить папку</string>
+    <string name="auto_backup_off">Выключить</string>
+    <string name="auto_backup_choose">Выбрать папку</string>
+
+    <!-- Week widget -->
+    <string name="week_widget_description">Последние 7 дней и кнопка «Без боли сегодня»</string>
+    <string name="week_widget_mark">Без боли сегодня</string>
+    <string name="week_widget_unmark">Снять отметку за сегодня</string>
+    <string name="week_widget_has_entry">Сегодня уже есть запись</string>
+
+    <!-- Day factors -->
+    <string name="factors_title">Факторы дня</string>
+    <string name="factors_fill">Заполнить</string>
+    <string name="factors_edit">Изменить</string>
+    <string name="factors_hide">Скрыть</string>
+    <string name="factors_hint">Отметьте, что было в этот день, с головной болью или без. Со временем приложение сравнит дни с болью и без неё.</string>
+    <string name="factors_stress">Стресс</string>
+    <string name="stress_none">Нет</string>
+    <string name="stress_moderate">Умеренный</string>
+    <string name="stress_high">Сильный</string>
+    <string name="factors_caffeine">Чашек кофе или других напитков с кофеином</string>
+    <string name="factors_alcohol">Алкоголь</string>
+    <string name="factors_low_water">Мало воды</string>
+    <string name="factors_skipped_meal">Пропуск еды</string>
+    <string name="factor_high_stress">Сильный стресс</string>
+    <string name="factor_moderate_stress">Умеренный стресс</string>
+    <string name="factor_caffeine">3 и больше напитков с кофеином</string>
+    <string name="factors_stats_title">Факторы дня</string>
+    <string name="factors_stats_logged">Заполнено дней за период: %1$d</string>
+    <string name="factors_stats_no_data">Пока мало данных: для сравнения нужно хотя бы %1$d заполненных дней с фактором и столько же без него.</string>
+    <string name="factors_stats_row">%1$s: боль была в %2$d%% таких дней (без этого — в %3$d%%; дней: %4$d и %5$d)</string>
+    <string name="factors_stats_note">Это сравнение ваших дней, а не доказательство причины: разные факторы часто идут вместе.</string>
+
+    <!-- Cycle -->
+    <string name="cycle_switch">Учитывать цикл</string>
+    <string name="cycle_switch_desc">Читает даты менструаций из Health Connect, если вы им пользуетесь, и проверяет, приходятся ли приступы на период от 2 дней до начала до 3 дней после. По умолчанию выключено; данные остаются на этом телефоне.</string>
+    <string name="health_cycle">Около начала менструации</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="cycle_stats_title">Цикл</string>
+    <string name="cycle_stats_no_data">За этот период нет приступов с данными о цикле.</string>
+    <string name="cycle_stats_attacks">Приступов в период от 2 дней до начала до 3 дней после начала менструации: %1$d из %2$d (%3$d%%)</string>
+    <string name="cycle_stats_baseline">Для сравнения: такие дни составляют %1$d%% всех дней за тот же период</string>
+    <string name="cycle_verdict_few">Пока мало данных: нужно хотя бы 5 приступов с данными о цикле.</string>
+    <string name="cycle_verdict_more">По вашим записям приступы заметно чаще приходятся на время около начала менструации, чем обычно. Возможно, стоит обсудить это с врачом.</string>
+    <string name="cycle_verdict_none">Явной связи приступов с циклом пока не видно.</string>
+    <string name="cycle_stats_note">Это лишь статистическая подсказка по вашим записям, а не диагноз.</string>
+    <string name="report_cycle">Приступов в период от 2 дней до начала до 3 дней после начала менструации: %1$d из %2$d</string>
+
+    <!-- Doctor report chart -->
+    <string name="report_chart_title">За период</string>
+    <string name="report_chart_note">На графике последние %1$d дн.</string>
+    <string name="report_chart_legend_pain">сила боли (0–10)</string>
+    <string name="report_chart_legend_pressure">давление, %1$s</string>
+    <string name="report_chart_legend_free">день без боли</string>
 </resources>

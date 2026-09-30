@@ -50,7 +50,13 @@ object PainWidget {
         return result
     }
 
+    /** Перерисовывает все виджеты приложения (кнопку боли и недельный). */
     suspend fun updateAll(context: Context) {
+        updatePainWidget(context)
+        WeekWidget.update(context)
+    }
+
+    private suspend fun updatePainWidget(context: Context) {
         val manager = AppWidgetManager.getInstance(context)
         val ids = manager.getAppWidgetIds(ComponentName(context, PainWidgetProvider::class.java))
         if (ids.isEmpty()) return

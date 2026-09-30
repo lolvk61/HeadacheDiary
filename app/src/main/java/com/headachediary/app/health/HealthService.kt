@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.MenstruationPeriodRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
@@ -14,6 +15,7 @@ import androidx.health.connect.client.time.TimeRangeFilter
 import com.headachediary.app.data.AppDatabase
 import com.headachediary.app.data.SHORT_SLEEP_MINUTES
 import com.headachediary.app.settings.AppSettings
+import com.headachediary.app.ui.toLocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Duration
@@ -27,6 +29,10 @@ import java.time.ZoneId
 data class HealthSnapshot(val sleepMinutes: Int?, val steps24h: Int?, val restingHeartRate: Int?) {
     val isEmpty: Boolean get() = sleepMinutes == null && steps24h == null && restingHeartRate == null
 }
+
+/** Окно вокруг начала менструации, в которое чаще всего приходятся менструальные мигрени: −2…+3 дня. */
+const val CYCLE_WINDOW_BEFORE_DAYS = 2L
+const val CYCLE_WINDOW_AFTER_DAYS = 3L
 
 /** «Обычный фон» за период — для сравнения с моментами приступов. Null внутри — данных мало. */
 data class HealthBaseline(val shortSleepShare: Double?, val avgSteps: Int?, val avgRestingHeartRate: Int?)
@@ -46,6 +52,9 @@ object HealthService {
         HealthPermission.getReadPermission(StepsRecord::class),
         HealthPermission.getReadPermission(RestingHeartRateRecord::class),
     )
+
+    /** Отдельное право на чтение дат менструации: запрашивается только если включён учёт цикла. */
+    val cyclePermissions: Set<String> = setOf(HealthPermission.getReadPermission(MenstruationPeriodRecord::class))
 
     private val sleepPermission = HealthPermission.getReadPermission(SleepSessionRecord::class)
     private val stepsPermission = HealthPermission.getReadPermission(StepsRecord::class)
@@ -149,26 +158,80 @@ object HealthService {
         HealthSnapshot(sleep, steps, heart).takeUnless { it.isEmpty }
     }
 
+    // --- цикл ---
+
+    /** Даты начала менструаций из Health Connect за период; null — цикл выключен, недоступен или нет права. */
+    private suspend fun periodStarts(context: Context, from: LocalDate, to: LocalDate): List<LocalDate>? =
+        withContext(Dispatchers.IO) {
+            if (!AppSettings.cycleEnabled(context) || !isAvailable(context)) return@withContext null
+            val client = HealthConnectClient.getOrCreate(context)
+            if (HealthPermission.getReadPermission(MenstruationPeriodRecord::class) !in grantedPermissions(client)) {
+                return@withContext null
+            }
+            val zone = ZoneId.systemDefault()
+            runCatching {
+                val records = client.readRecords(
+                    ReadRecordsRequest(
+                        recordType = MenstruationPeriodRecord::class,
+                        timeRangeFilter = TimeRangeFilter.between(
+                            from.atStartOfDay(zone).toInstant(),
+                            to.plusDays(1).atStartOfDay(zone).toInstant(),
+                        ),
+                    ),
+                ).records
+                records.map { it.startTime.atZone(zone).toLocalDate() }.distinct().sorted()
+            }.onFailure { Log.w(TAG, "Cycle read failed", it) }.getOrNull()
+        }
+
+    /** Пришёлся ли [date] на окно −2…+3 дня вокруг начала менструации; null, если данных о цикле нет. */
+    private suspend fun perimenstrualOn(context: Context, date: LocalDate): Boolean? {
+        val starts = periodStarts(context, date.minusDays(60), date.plusDays(10)) ?: return null
+        if (starts.isEmpty()) return null
+        return starts.any { date >= it.minusDays(CYCLE_WINDOW_BEFORE_DAYS) && date <= it.plusDays(CYCLE_WINDOW_AFTER_DAYS) }
+    }
+
     /**
-     * Записывает данные с часов в приступ [entryId]. Не затирает уже сохранённые значения пустыми.
+     * Какая доля дней за последние [days] дней попадает в околоменструальное окно — «обычный фон» для сравнения
+     * с приступами. Null, если данных о цикле нет.
+     */
+    suspend fun cycleBaseline(context: Context, days: Int): Double? {
+        val today = LocalDate.now()
+        val from = today.minusDays(days.toLong())
+        val starts = periodStarts(context, from.minusDays(10), today.plusDays(10)) ?: return null
+        if (starts.isEmpty()) return null
+        val inWindow = generateSequence(from) { it.plusDays(1) }.takeWhile { !it.isAfter(today) }.count { day ->
+            starts.any { day >= it.minusDays(CYCLE_WINDOW_BEFORE_DAYS) && day <= it.plusDays(CYCLE_WINDOW_AFTER_DAYS) }
+        }
+        return inWindow.toDouble() / (days + 1)
+    }
+
+    /**
+     * Записывает данные с часов и цикла в приступ [entryId]. Не затирает уже сохранённые значения пустыми.
      * Возвращает true, если у записи теперь есть хоть какие-то данные.
      */
     suspend fun attach(context: Context, entryId: Long, force: Boolean = false): Boolean {
-        if (!AppSettings.healthEnabled(context)) return false
+        val healthOn = AppSettings.healthEnabled(context)
+        val cycleOn = AppSettings.cycleEnabled(context)
+        if (!healthOn && !cycleOn) return false
         val dao = AppDatabase.get(context).dao()
         val entry = dao.byId(entryId) ?: return false
-        if (!force && entry.sleepMinutes != null && entry.steps24h != null && entry.restingHeartRate != null) return true
+        val healthDone = !healthOn || (entry.sleepMinutes != null && entry.steps24h != null && entry.restingHeartRate != null)
+        val cycleDone = !cycleOn || entry.perimenstrual != null
+        if (!force && healthDone && cycleDone) return true
 
-        val snapshot = snapshotBefore(context, entry.startTime)
-        if (snapshot != null) {
+        val snapshot = if (healthOn) snapshotBefore(context, entry.startTime) else null
+        val perimenstrual = if (cycleOn) perimenstrualOn(context, entry.startTime.toLocalDate()) else null
+        if (snapshot != null || perimenstrual != null) {
             dao.updateHealth(
                 id = entryId,
-                sleepMinutes = snapshot.sleepMinutes ?: entry.sleepMinutes,
-                steps24h = snapshot.steps24h ?: entry.steps24h,
-                restingHeartRate = snapshot.restingHeartRate ?: entry.restingHeartRate,
+                sleepMinutes = snapshot?.sleepMinutes ?: entry.sleepMinutes,
+                steps24h = snapshot?.steps24h ?: entry.steps24h,
+                restingHeartRate = snapshot?.restingHeartRate ?: entry.restingHeartRate,
+                perimenstrual = perimenstrual ?: entry.perimenstrual,
             )
         }
-        return snapshot != null || entry.sleepMinutes != null || entry.steps24h != null || entry.restingHeartRate != null
+        return snapshot != null || perimenstrual != null || entry.sleepMinutes != null ||
+            entry.steps24h != null || entry.restingHeartRate != null || entry.perimenstrual != null
     }
 
     /**
@@ -176,11 +239,17 @@ object HealthService {
      * поэтому сон предыдущей ночи может появиться в Health Connect уже после записи приступа.
      */
     suspend fun fillRecent(context: Context, days: Int = 7) {
-        if (!AppSettings.healthEnabled(context)) return
+        val healthOn = AppSettings.healthEnabled(context)
+        val cycleOn = AppSettings.cycleEnabled(context)
+        if (!healthOn && !cycleOn) return
         val since = System.currentTimeMillis() - days * 24L * 60 * 60 * 1000
         val dao = AppDatabase.get(context).dao()
         dao.allOnce()
-            .filter { it.startTime >= since && (it.sleepMinutes == null || it.steps24h == null || it.restingHeartRate == null) }
+            .filter {
+                it.startTime >= since &&
+                    ((healthOn && (it.sleepMinutes == null || it.steps24h == null || it.restingHeartRate == null)) ||
+                        (cycleOn && it.perimenstrual == null))
+            }
             .forEach { attach(context, it.id) }
     }
 

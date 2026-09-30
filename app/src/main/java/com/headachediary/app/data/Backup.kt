@@ -3,18 +3,23 @@ package com.headachediary.app.data
 import org.json.JSONArray
 import org.json.JSONObject
 
-/** Содержимое резервной копии: приступы и дни, отмеченные как «без боли». */
-data class BackupData(val entries: List<HeadacheEntry>, val painFreeDays: List<Long>)
+/** Содержимое резервной копии: приступы, дни «без боли» и факторы дня. */
+data class BackupData(
+    val entries: List<HeadacheEntry>,
+    val painFreeDays: List<Long>,
+    val dayFactors: List<DayFactors> = emptyList(),
+)
 
 /** Резервная копия в формате JSON: переносится между телефонами и читается человеком. */
 object Backup {
     private const val APP_ID = "HeadacheDiary"
-    private const val FORMAT_VERSION = 4
+    private const val FORMAT_VERSION = 5
     private const val MAX_TEXT = 5_000
 
     fun toJson(
         entries: List<HeadacheEntry>,
         painFreeDays: List<Long>,
+        dayFactors: List<DayFactors> = emptyList(),
         exportedAt: Long = System.currentTimeMillis(),
     ): String {
         val array = JSONArray()
@@ -39,17 +44,31 @@ object Backup {
                     e.sleepMinutes?.let { put("sleepMinutes", it) }
                     e.steps24h?.let { put("steps24h", it) }
                     e.restingHeartRate?.let { put("restingHeartRate", it) }
+                    e.perimenstrual?.let { put("perimenstrual", it) }
                 },
             )
         }
         val days = JSONArray()
         painFreeDays.sorted().forEach { days.put(it) }
+        val factors = JSONArray()
+        dayFactors.sortedBy { it.day }.forEach { f ->
+            factors.put(
+                JSONObject()
+                    .put("day", f.day)
+                    .put("stress", f.stress)
+                    .put("caffeine", f.caffeine)
+                    .put("alcohol", f.alcohol)
+                    .put("lowWater", f.lowWater)
+                    .put("skippedMeal", f.skippedMeal),
+            )
+        }
         return JSONObject()
             .put("app", APP_ID)
             .put("version", FORMAT_VERSION)
             .put("exportedAt", exportedAt)
             .put("entries", array)
             .put("painFreeDays", days)
+            .put("dayFactors", factors)
             .toString(2)
     }
 
@@ -92,16 +111,34 @@ object Backup {
                 sleepMinutes = o.optNumber("sleepMinutes")?.toInt(),
                 steps24h = o.optNumber("steps24h")?.toInt(),
                 restingHeartRate = o.optNumber("restingHeartRate")?.toInt(),
+                perimenstrual = if (o.has("perimenstrual") && !o.isNull("perimenstrual")) o.optBoolean("perimenstrual") else null,
             )
         }
 
-        // Копии старых версий не содержат этого поля — тогда отмеченных дней просто нет.
+        // Копии старых версий не содержат этих полей — тогда отмеченных дней и факторов просто нет.
         val daysArray = root.optJSONArray("painFreeDays")
         val painFreeDays = if (daysArray == null) {
             emptyList()
         } else {
             (0 until daysArray.length()).map { daysArray.getLong(it) }
         }
-        return BackupData(entries, painFreeDays)
+
+        val factorsArray = root.optJSONArray("dayFactors")
+        val dayFactors = if (factorsArray == null) {
+            emptyList()
+        } else {
+            (0 until factorsArray.length()).map { i ->
+                val f = factorsArray.getJSONObject(i)
+                DayFactors(
+                    day = f.getLong("day"),
+                    stress = f.optInt("stress", 0).coerceIn(0, 2),
+                    caffeine = f.optInt("caffeine", 0).coerceIn(0, 4),
+                    alcohol = f.optBoolean("alcohol", false),
+                    lowWater = f.optBoolean("lowWater", false),
+                    skippedMeal = f.optBoolean("skippedMeal", false),
+                )
+            }
+        }
+        return BackupData(entries, painFreeDays, dayFactors)
     }
 }

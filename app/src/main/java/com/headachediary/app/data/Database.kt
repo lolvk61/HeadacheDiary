@@ -59,9 +59,15 @@ interface EntryDao {
     /** Обновляет только поля данных с часов. */
     @Query(
         "UPDATE entries SET sleepMinutes = :sleepMinutes, steps24h = :steps24h, " +
-            "restingHeartRate = :restingHeartRate WHERE id = :id",
+            "restingHeartRate = :restingHeartRate, perimenstrual = :perimenstrual WHERE id = :id",
     )
-    suspend fun updateHealth(id: Long, sleepMinutes: Int?, steps24h: Int?, restingHeartRate: Int?)
+    suspend fun updateHealth(
+        id: Long,
+        sleepMinutes: Int?,
+        steps24h: Int?,
+        restingHeartRate: Int?,
+        perimenstrual: Boolean?,
+    )
 
     @Delete
     suspend fun delete(entry: HeadacheEntry)
@@ -82,9 +88,27 @@ interface EntryDao {
 
     @Query("DELETE FROM pain_free_days WHERE day = :day")
     suspend fun unmarkPainFree(day: Long)
+
+    // Факторы дня
+
+    @Query("SELECT * FROM day_factors")
+    fun dayFactors(): Flow<List<DayFactors>>
+
+    @Query("SELECT * FROM day_factors")
+    suspend fun dayFactorsOnce(): List<DayFactors>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveDayFactors(factors: DayFactors)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertDayFactors(factors: List<DayFactors>)
 }
 
-@Database(entities = [HeadacheEntry::class, PainFreeDay::class], version = 4, exportSchema = false)
+@Database(
+    entities = [HeadacheEntry::class, PainFreeDay::class, DayFactors::class],
+    version = 5,
+    exportSchema = false,
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun dao(): EntryDao
 
@@ -124,12 +148,24 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Версия 5: признак околоменструального окна у приступа и таблица факторов дня. */
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE entries ADD COLUMN perimenstrual INTEGER")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `day_factors` (`day` INTEGER NOT NULL, `stress` INTEGER NOT NULL, " +
+                        "`caffeine` INTEGER NOT NULL, `alcohol` INTEGER NOT NULL, `lowWater` INTEGER NOT NULL, " +
+                        "`skippedMeal` INTEGER NOT NULL, PRIMARY KEY(`day`))",
+                )
+            }
+        }
+
         fun get(context: Context): AppDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
                 "headache.db",
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { instance = it }
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build().also { instance = it }
         }
     }
 }

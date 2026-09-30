@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import com.headachediary.app.MainActivity
 import com.headachediary.app.R
 import com.headachediary.app.data.AppDatabase
+import com.headachediary.app.data.AutoBackup
 import com.headachediary.app.data.PainFreeDay
 import com.headachediary.app.data.pressureRelevance
 import com.headachediary.app.settings.AppSettings
@@ -112,7 +113,9 @@ object Notifications {
 object ReminderScheduler {
     private const val REQ_DAILY = 100
     private const val REQ_FORECAST = 101
+    private const val REQ_BACKUP = 102
     private const val FORECAST_HOUR = 8
+    private const val BACKUP_HOUR = 3
 
     fun scheduleAll(context: Context) {
         val app = context.applicationContext
@@ -126,6 +129,11 @@ object ReminderScheduler {
             schedule(app, REQ_FORECAST, FORECAST_HOUR, 0, ForecastAlertReceiver::class.java)
         } else {
             cancel(app, REQ_FORECAST, ForecastAlertReceiver::class.java)
+        }
+        if (AppSettings.autoBackupFolder(app) != null) {
+            schedule(app, REQ_BACKUP, BACKUP_HOUR, 0, AutoBackupReceiver::class.java)
+        } else {
+            cancel(app, REQ_BACKUP, AutoBackupReceiver::class.java)
         }
     }
 
@@ -213,6 +221,22 @@ class ForecastAlertReceiver : BroadcastReceiver() {
                 if (relevance.unlikely) return@launch
                 val ctx = app.localized()
                 Notifications.postForecast(app, outlookMessage(ctx, outlook, relevance))
+            } finally {
+                pending.finish()
+            }
+        }
+    }
+}
+
+/** Ночью делает автоматическую резервную копию в выбранную папку. */
+class AutoBackupReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val app = context.applicationContext
+        val pending = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                ReminderScheduler.scheduleAll(app)
+                AutoBackup.run(app)
             } finally {
                 pending.finish()
             }

@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.headachediary.app.R
+import com.headachediary.app.data.DayFactors
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
 import com.headachediary.app.data.PressureRelevance
@@ -62,11 +63,13 @@ import java.time.format.TextStyle as DateTextStyle
 fun JournalScreen(
     entries: List<HeadacheEntry>,
     painFreeDays: Set<Long>,
+    dayFactors: Map<Long, DayFactors>,
     onPainNow: () -> Unit,
     onOpen: (HeadacheEntry) -> Unit,
     onEnd: (HeadacheEntry) -> Unit,
     onMarkPainFree: (Long) -> Unit,
     onUnmarkPainFree: (Long) -> Unit,
+    onSaveFactors: (DayFactors) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -123,6 +126,8 @@ fun JournalScreen(
                 )
             }
         }
+
+        item { FactorsCard(today.toEpochDay(), dayFactors[today.toEpochDay()], onSaveFactors) }
 
         outlook?.let { o -> item { OutlookCard(o, pressureRelevance(entries)) } }
 

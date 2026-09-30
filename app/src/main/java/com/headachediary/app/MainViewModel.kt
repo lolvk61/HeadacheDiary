@@ -6,7 +6,9 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.headachediary.app.data.AppDatabase
+import com.headachediary.app.data.AutoBackup
 import com.headachediary.app.data.Backup
+import com.headachediary.app.data.DayFactors
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.PainFreeDay
 import com.headachediary.app.health.HealthService
@@ -38,6 +40,20 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         .map { list -> list.map { it.day }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
+    /** Факторы дня по дню (число дней от 1970-01-01). */
+    val dayFactors: StateFlow<Map<Long, DayFactors>> = dao.dayFactors()
+        .map { list -> list.associateBy { it.day } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    fun saveDayFactors(factors: DayFactors) {
+        viewModelScope.launch { dao.saveDayFactors(factors) }
+    }
+
+    /** Делает автоматическую копию прямо сейчас (для кнопки в настройках). */
+    fun runAutoBackup(onDone: (Boolean) -> Unit) {
+        viewModelScope.launch { onDone(AutoBackup.run(context)) }
+    }
+
     /** Создаёт запись со временем "прямо сейчас" — вызывается по нажатию главной кнопки. */
     fun startNow(onCreated: (Long) -> Unit) = addAt(System.currentTimeMillis(), onCreated)
 
@@ -56,7 +72,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Открытая запись без данных с часов: пробуем дописать (часы могли синхронизироваться позже). */
     fun ensureHealth(entry: HeadacheEntry) {
-        if (entry.sleepMinutes != null && entry.steps24h != null && entry.restingHeartRate != null) return
+        val healthDone = !AppSettings.healthEnabled(context) ||
+            (entry.sleepMinutes != null && entry.steps24h != null && entry.restingHeartRate != null)
+        val cycleDone = !AppSettings.cycleEnabled(context) || entry.perimenstrual != null
+        if (healthDone && cycleDone) return
         viewModelScope.launch { HealthService.attach(context, entry.id) }
     }
 
@@ -70,11 +89,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun markPainFree(day: Long) {
-        viewModelScope.launch { dao.markPainFree(PainFreeDay(day)) }
+        viewModelScope.launch {
+            dao.markPainFree(PainFreeDay(day))
+            PainWidget.updateAll(context)
+        }
     }
 
     fun unmarkPainFree(day: Long) {
-        viewModelScope.launch { dao.unmarkPainFree(day) }
+        viewModelScope.launch {
+            dao.unmarkPainFree(day)
+            PainWidget.updateAll(context)
+        }
     }
 
     /** Обновляет запомненное местоположение при запуске, пока приложение на экране и Android отдаёт координаты. */
@@ -117,7 +142,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val ok = withContext(Dispatchers.IO) {
                 runCatching {
-                    val json = Backup.toJson(dao.allOnce(), dao.painFreeDaysOnce().map { it.day })
+                    val json = Backup.toJson(dao.allOnce(), dao.painFreeDaysOnce().map { it.day }, dao.dayFactorsOnce())
                     val stream = context.contentResolver.openOutputStream(uri, "wt") ?: error("No output stream")
                     stream.use { it.write(json.toByteArray(Charsets.UTF_8)) }
                 }.isSuccess
@@ -139,6 +164,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     val fresh = data.entries.filter { it.startTime !in existing }.distinctBy { it.startTime }
                     dao.insertAll(fresh)
                     dao.markPainFreeAll(data.painFreeDays.map { PainFreeDay(it) })
+                    dao.insertDayFactors(data.dayFactors)
                     ImportResult(added = fresh.size, skipped = data.entries.size - fresh.size)
                 }.getOrNull()
             }

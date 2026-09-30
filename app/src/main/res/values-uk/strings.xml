@@ -1,0 +1,433 @@
+<resources>
+    <string name="app_name">Щоденник головного болю</string>
+    <string name="widget_description">Одне натискання — записати початок або кінець головного болю</string>
+
+    <!-- Common -->
+    <string name="back">Назад</string>
+    <string name="delete">Видалити</string>
+    <string name="cancel">Скасувати</string>
+    <string name="save">Зберегти</string>
+
+    <!-- Tabs -->
+    <string name="tab_journal">Журнал</string>
+    <string name="tab_calendar">Календар</string>
+    <string name="tab_stats">Статистика</string>
+    <string name="tab_settings">Налаштування</string>
+
+    <!-- Headache types -->
+    <string name="type_migraine">Мігрень</string>
+    <string name="type_tension">Звичайний головний біль</string>
+    <string name="type_unknown">Тип не вказано</string>
+
+    <!-- Symptom groups -->
+    <string name="group_migraine">Частіше при мігрені</string>
+    <string name="group_tension">Частіше при звичайному головному болю</string>
+    <string name="group_common">Інше</string>
+
+    <!-- Symptoms -->
+    <string name="sym_pulsating">Пульсівний біль</string>
+    <string name="sym_one_sided">Біль з одного боку</string>
+    <string name="sym_nausea">Нудота</string>
+    <string name="sym_vomiting">Блювання</string>
+    <string name="sym_photophobia">Чутливість до світла</string>
+    <string name="sym_phonophobia">Чутливість до звуків</string>
+    <string name="sym_smell">Чутливість до запахів</string>
+    <string name="sym_aura">Аура (мерехтіння, плями, оніміння)</string>
+    <string name="sym_worse_movement">Посилюється від руху</string>
+    <string name="sym_pressing">Тисне, «обруч» на голові</string>
+    <string name="sym_both_sides">Біль з обох боків</string>
+    <string name="sym_mild">Легкий або помірний</string>
+    <string name="sym_neck_tension">Напруга шиї та плечей</string>
+    <string name="sym_not_worse_movement">Не посилюється від руху</string>
+    <string name="sym_dizziness">Запаморочення</string>
+    <string name="sym_fatigue">Втома, розбитість</string>
+    <string name="sym_irritability">Дратівливість</string>
+    <string name="sym_concentration">Важко зосередитися</string>
+    <string name="sym_eye_pain">Біль за оком</string>
+
+    <!-- Triggers -->
+    <string name="trg_sleep">Недосип або надмірний сон</string>
+    <string name="trg_stress">Стрес</string>
+    <string name="trg_alcohol">Алкоголь</string>
+    <string name="trg_caffeine">Кофеїн</string>
+    <string name="trg_skipped_meal">Пропущений прийом їжі</string>
+    <string name="trg_dehydration">Мало води</string>
+    <string name="trg_weather">Погода</string>
+    <string name="trg_menstruation">Менструація</string>
+    <string name="trg_bright_light">Яскраве світло</string>
+    <string name="trg_screen">Довго за екраном</string>
+    <string name="trg_smells">Різкі запахи</string>
+    <string name="trg_food">Певна їжа</string>
+    <string name="trg_physical">Фізичне навантаження</string>
+
+    <!-- Medication effect -->
+    <string name="med_yes">Допомогло</string>
+    <string name="med_partly">Частково</string>
+    <string name="med_no">Не допомогло</string>
+
+    <!-- Intensity -->
+    <string name="intensity_none">Силу не вказано</string>
+    <string name="intensity_weak">Слабкий</string>
+    <string name="intensity_medium">Середній</string>
+    <string name="intensity_strong">Сильний</string>
+    <string name="intensity_very_strong">Дуже сильний</string>
+    <string name="intensity_hint">Пересуньте повзунок</string>
+    <string name="intensity_of_10">з 10</string>
+
+    <!-- Durations -->
+    <string name="duration_min">%1$d хв</string>
+    <string name="duration_h">%1$d год</string>
+    <string name="duration_h_min">%1$d год %2$d хв</string>
+
+    <!-- Journal -->
+    <string name="journal_greeting">Як ви почуваєтеся?</string>
+    <string name="hero_pain_title">Болить голова</string>
+    <string name="hero_pain_subtitle">Натисніть — час запишеться одразу</string>
+    <string name="hero_ongoing_title">Напад триває</string>
+    <string name="hero_ongoing_subtitle">З %1$s · уже %2$s</string>
+    <string name="hero_end">Біль минув</string>
+    <string name="hero_details">Додати деталі</string>
+    <string name="tile_pain_days_30">Днів болю за 30 дн.</string>
+    <string name="tile_migraine_days">Днів мігрені</string>
+    <string name="tile_pain_free_days">Днів без болю</string>
+    <string name="journal_history">Історія</string>
+    <string name="week_title">Останні 7 днів</string>
+    <string name="empty_title">Поки немає записів</string>
+    <string name="empty_body">Коли почнеться біль, натисніть червону кнопку вище — час збережеться автоматично. Тут з\'являться історія, статистика та календар.</string>
+
+    <!-- Entry card -->
+    <string name="entry_since">з %1$s</string>
+    <string name="entry_and_more">%1$s і ще %2$d</string>
+    <string name="entry_medication">Ліки: %1$s</string>
+
+    <!-- Editor -->
+    <string name="editor_title">Запис про біль</string>
+    <string name="section_time">Час</string>
+    <string name="time_started">Почався</string>
+    <string name="time_ended">Закінчився</string>
+    <string name="time_still_hurts">ще болить</string>
+    <string name="time_change">Змінити</string>
+    <string name="btn_ended_now">Минув щойно</string>
+    <string name="btn_still_hurts">Ще болить</string>
+    <string name="err_end_before_start">Час закінчення раніший за початок — його не буде збережено.</string>
+    <string name="duration_label">Тривалість: %1$s</string>
+    <string name="section_type">Тип болю</string>
+    <string name="section_intensity">Сила болю</string>
+    <string name="section_symptoms">Симптоми</string>
+    <string name="section_triggers">Можливі провокатори</string>
+    <string name="section_medication">Ліки</string>
+    <string name="med_hint">Що приймали і в якій дозі</string>
+    <string name="section_notes">Нотатки</string>
+    <string name="delete_title">Видалити запис?</string>
+    <string name="delete_text">Цю дію не можна скасувати.</string>
+
+    <!-- Calendar -->
+    <string name="cal_title">Календар</string>
+    <string name="cal_month_none">У цьому місяці днів із болем немає</string>
+    <string name="cal_month_count">Днів із болем у цьому місяці: %1$d</string>
+    <string name="cal_prev">Попередній місяць</string>
+    <string name="cal_next">Наступний місяць</string>
+    <string name="legend_weak">слабкий</string>
+    <string name="legend_medium">середній</string>
+    <string name="legend_strong">сильний</string>
+    <string name="legend_migraine">М — мігрень</string>
+    <string name="cal_migraine_letter">М</string>
+    <string name="cal_no_pain">У цей день болю не позначено.</string>
+    <string name="cal_add_for_day">Додати запис за цей день</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Статистика</string>
+    <string name="period_30">30 днів</string>
+    <string name="period_90">90 днів</string>
+    <string name="period_year">Рік</string>
+    <string name="period_all">Увесь час</string>
+    <string name="stat_pain_days">Днів із болем</string>
+    <string name="stat_migraine_days">Днів мігрені</string>
+    <string name="stat_tension_days">Звичайний біль</string>
+    <string name="stat_avg_intensity">Середня сила</string>
+    <string name="stat_avg_duration">Середня тривалість</string>
+    <string name="stat_med_days">Днів із ліками</string>
+    <string name="warn_med_overuse">Знеболювальні приймали 10 і більше днів за місяць. Часте вживання ліків саме може посилювати головний біль — варто обговорити це з лікарем.</string>
+    <string name="bars_title">Сила болю за днями</string>
+    <string name="bars_subtitle">Останні 30 днів</string>
+    <string name="bars_30_ago">30 дн. тому</string>
+    <string name="bars_today">сьогодні</string>
+    <string name="rank_triggers">Часті провокатори</string>
+    <string name="rank_symptoms">Часті симптоми</string>
+    <string name="rank_no_data">За вибраний період поки немає даних.</string>
+    <string name="btn_doctor_report">Звіт для лікаря</string>
+    <string name="disclaimer">Застосунок веде щоденник і не замінює консультацію лікаря.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Налаштування</string>
+    <string name="settings_appearance">Оформлення</string>
+    <string name="settings_theme">Тема</string>
+    <string name="theme_system">Як у системі</string>
+    <string name="theme_light">Світла</string>
+    <string name="theme_dark">Темна</string>
+    <string name="settings_language">Мова</string>
+    <string name="lang_system">Як у системі</string>
+    <string name="settings_data">Дані</string>
+    <string name="action_doctor_report">Звіт для лікаря (PDF)</string>
+    <string name="action_doctor_report_desc">Зрозуміле зведення та список нападів за вибраний період — можна показати або надіслати лікареві</string>
+    <string name="action_backup">Зберегти резервну копію</string>
+    <string name="action_backup_desc">Файл з усіма записами: щоб зберегти про запас або перенести на інший телефон</string>
+    <string name="action_restore">Завантажити з резервної копії</string>
+    <string name="action_restore_desc">Додасть записи з файлу. Ті, що у вас уже є, не задублюються</string>
+    <string name="backup_saved">Резервну копію збережено</string>
+    <string name="backup_failed">Не вдалося зберегти файл</string>
+    <string name="import_done">Додано записів: %1$d, пропущено дублікатів: %2$d</string>
+    <string name="import_failed">Не вдалося прочитати файл. Виберіть резервну копію, створену цим застосунком.</string>
+    <string name="settings_about">Про застосунок</string>
+    <string name="about_version">Версія %1$s</string>
+    <string name="about_privacy">Усі записи зберігаються лише на цьому телефоні й нікуди не надсилаються, доки ви самі не поділитеся звітом або резервною копією. Якщо ввімкнути запис погоди, до сервісу погоди надсилаються лише приблизні координати.</string>
+    <string name="about_weather_source">Дані про погоду: Open-Meteo.com, запасне джерело — MET Norway (api.met.no). Пошук міста: Open-Meteo та OpenStreetMap.</string>
+
+    <!-- Doctor report -->
+    <string name="report_dialog_title">Звіт для лікаря</string>
+    <string name="report_dialog_text">За який період включити записи до PDF?</string>
+    <string name="report_create">Створити</string>
+    <string name="report_creating">Створюю…</string>
+    <string name="report_empty">За вибраний період немає записів</string>
+    <string name="report_failed">Не вдалося створити звіт</string>
+    <string name="report_share">Надіслати звіт</string>
+    <string name="report_title">Щоденник головного болю</string>
+    <string name="report_period">Період: %1$s – %2$s (%3$d дн.)</string>
+    <string name="report_generated">Сформовано: %1$s</string>
+    <string name="report_summary">Коротко</string>
+    <string name="report_pain_days">Днів із головним болем: %1$d з %2$d</string>
+    <string name="report_attacks">Усього нападів: %1$d</string>
+    <string name="report_migraine_days">Днів із мігренню: %1$d</string>
+    <string name="report_tension_days">Днів зі звичайним головним болем: %1$d</string>
+    <string name="report_avg_intensity">Середня сила болю: %1$s з 10</string>
+    <string name="report_avg_duration">Середня тривалість нападу: %1$s</string>
+    <string name="report_med_days">Днів із прийомом ліків: %1$d</string>
+    <string name="report_frequent_triggers">Часті провокатори: %1$s</string>
+    <string name="report_frequent_symptoms">Часті симптоми: %1$s</string>
+    <string name="report_med_note">Зверніть увагу: знеболювальні приймали 10 і більше днів за останні 30 днів.</string>
+    <string name="report_episodes">Напади за датами</string>
+    <string name="report_end_unknown">з %1$s, час закінчення не вказано</string>
+    <string name="report_intensity">сила болю %1$d з 10 (%2$s)</string>
+    <string name="report_intensity_unknown">силу болю не вказано</string>
+    <string name="report_symptoms">Симптоми: %1$s</string>
+    <string name="report_triggers">Можливі провокатори: %1$s</string>
+    <string name="report_medication">Ліки: %1$s</string>
+    <string name="report_notes">Нотатки: %1$s</string>
+    <string name="report_page">Стор. %1$d</string>
+    <string name="report_disclaimer">Звіт складено за записами самого пацієнта і він не є медичним висновком.</string>
+
+    <!-- Widget -->
+    <string name="widget_status_ongoing">Напад з %1$s</string>
+    <string name="widget_status_last">Востаннє: %1$s</string>
+    <string name="widget_status_hint">Натисніть, коли почнеться біль</string>
+    <string name="toast_started">Записано: біль з %1$s</string>
+    <string name="toast_ended">Біль минув. Тривав %1$s</string>
+
+    <!-- Weather: settings -->
+    <string name="settings_weather">Погода і тиск</string>
+    <string name="weather_switch">Записувати погоду під час кожного нападу</string>
+    <string name="weather_switch_desc">Використовує приблизне місцезнаходження та безкоштовний сервіс Open-Meteo, щоб зберегти температуру й атмосферний тиск у момент нападу. Надсилаються лише координати, округлені приблизно до 1 км; ваші записи нікуди не надходять.</string>
+    <string name="weather_permission_denied">Немає доступу до місцезнаходження. Вкажіть своє місто нижче.</string>
+    <string name="weather_city_hint">Місто</string>
+    <string name="weather_city_find">Знайти</string>
+    <string name="weather_city_set">Використовується місто: %1$s</string>
+    <string name="weather_city_not_found">Місто не знайдено</string>
+    <string name="weather_city_use_location">Використовувати моє місцезнаходження</string>
+    <string name="weather_location_ok">Місцезнаходження визначено (приблизно)</string>
+    <string name="weather_location_none">Місцезнаходження поки не визначено. Відкрийте застосунок зі ввімкненою геолокацією</string>
+    <string name="pressure_unit">Одиниці тиску</string>
+    <string name="unit_mmhg">мм рт. ст.</string>
+    <string name="unit_hpa">гПа</string>
+
+    <!-- Weather: editor -->
+    <string name="section_weather">Погода в цей час</string>
+    <string name="weather_temperature">Температура</string>
+    <string name="weather_conditions">Стан</string>
+    <string name="weather_pressure">Тиск</string>
+    <string name="weather_change_3h">Зміна за 3 год</string>
+    <string name="weather_change_24h">Зміна за 24 год</string>
+    <string name="weather_humidity">Вологість</string>
+    <string name="weather_none">Для цього запису погоду ще не записано.</string>
+    <string name="weather_refresh">Оновити погоду</string>
+    <string name="weather_loading">Завантажую…</string>
+    <string name="weather_no_location">Не вдалося визначити місцезнаходження. Увімкніть геолокацію на телефоні або вкажіть місто в налаштуваннях.</string>
+    <string name="weather_no_network">Не вдалося зв\'язатися із сервісом погоди. Перевірте підключення до інтернету.</string>
+
+    <!-- Weather conditions -->
+    <string name="wx_clear">Ясно</string>
+    <string name="wx_partly">Мінлива хмарність</string>
+    <string name="wx_cloudy">Похмуро</string>
+    <string name="wx_fog">Туман</string>
+    <string name="wx_drizzle">Мжичка</string>
+    <string name="wx_rain">Дощ</string>
+    <string name="wx_snow">Сніг</string>
+    <string name="wx_thunder">Гроза</string>
+
+    <!-- Weather: statistics -->
+    <string name="weather_stats_title">Погода і тиск</string>
+    <string name="weather_stats_no_data">За цей період немає нападів із даними про погоду. Увімкніть запис погоди в налаштуваннях.</string>
+    <string name="weather_stats_attacks">Нападів із даними про погоду за останні %2$d дн.: %1$d</string>
+    <string name="weather_stats_avg_pressure">Середній тиск під час нападів: %1$s</string>
+    <string name="weather_stats_sharp">Перед %1$d із %2$d нападів тиск змінювався на 3 гПа (≈2 мм рт. ст.) і більше за 3 години (%3$d%%)</string>
+    <string name="weather_stats_baseline">Для порівняння: такі перепади бувають у %1$d%% усіх годин за той самий період</string>
+    <string name="weather_stats_baseline_loading">Порівнюю зі звичайною погодою…</string>
+    <string name="weather_stats_verdict_few">Поки замало даних: потрібно хоча б 5 записів із погодою.</string>
+    <string name="weather_stats_verdict_more">За вашими записами напади помітно частіше трапляються під час перепадів тиску, ніж зазвичай. Можливо, ви метеозалежні — варто обговорити це з лікарем.</string>
+    <string name="weather_stats_verdict_none">Явного зв\'язку нападів із перепадами тиску поки не видно.</string>
+    <string name="weather_stats_note">Це лише статистична підказка за вашими записами, а не діагноз.</string>
+
+    <!-- Pain-free days -->
+    <string name="journal_today_ask">Сьогодні без болю?</string>
+    <string name="journal_today_marked">Сьогодні позначено як день без болю</string>
+    <string name="journal_mark_pain_free">Позначити</string>
+    <string name="undo">Скасувати</string>
+    <string name="legend_pain_free">без болю</string>
+    <string name="cal_marked_pain_free">Цей день позначено як день без болю.</string>
+    <string name="cal_mark_pain_free">Позначити день без болю</string>
+    <string name="cal_unmark">Зняти позначку</string>
+    <string name="stat_tracked">Відстежено днів: %1$d (з болем: %2$d, без болю: %3$d)</string>
+    <string name="report_pain_free_days">Днів, позначених як «без болю»: %1$d</string>
+    <string name="toast_pain_free_marked">Позначено: сьогодні без болю</string>
+
+    <!-- Reminders and pressure alerts -->
+    <string name="settings_reminders">Нагадування та попередження</string>
+    <string name="reminder_switch">Вечірнє нагадування</string>
+    <string name="reminder_switch_desc">Питає, чи був сьогодні головний біль, щоб дні без болю теж записувалися. Не приходить, якщо день уже позначено.</string>
+    <string name="reminder_time">Час: %1$s (натисніть, щоб змінити)</string>
+    <string name="forecast_switch">Попереджати про перепади тиску</string>
+    <string name="forecast_switch_desc">Щоранку перевіряє прогноз і попереджає, якщо очікується різкий перепад тиску. Якщо за вашими записами такі перепади рідко передували нападам, застосунок мовчить. Потрібен увімкнений запис погоди.</string>
+    <string name="forecast_needs_weather">Спершу ввімкніть запис погоди</string>
+    <string name="notif_permission_denied">Сповіщення заборонено. Дозвольте їх у налаштуваннях телефона, щоб отримувати нагадування.</string>
+    <string name="ch_reminder">Вечірнє нагадування</string>
+    <string name="ch_forecast">Попередження про тиск</string>
+    <string name="reminder_title">Як минув день?</string>
+    <string name="reminder_text">Чи був сьогодні головний біль?</string>
+    <string name="action_no_pain">Болю не було</string>
+    <string name="action_had_pain">Був біль</string>
+    <string name="alert_title">Очікується перепад тиску</string>
+    <string name="alert_fall">Близько %2$s тиск упаде приблизно на %1$s за 3 години.</string>
+    <string name="alert_rise">Близько %2$s тиск зросте приблизно на %1$s за 3 години.</string>
+    <string name="alert_personal">Перед %1$d із ваших %2$d нападів із даними про погоду були такі перепади, тож сьогодні бережіть себе.</string>
+    <string name="alert_generic">У деяких людей у такі моменти болить голова, тож стежте за самопочуттям.</string>
+    <string name="alert_unlikely">За вашими записами такі перепади рідко передували нападам, тож, можливо, на вас це не впливає.</string>
+    <string name="outlook_swing_title">Найближчої доби очікується перепад тиску</string>
+    <string name="outlook_calm_title">Прогноз тиску</string>
+    <string name="outlook_calm_text">Найближчої доби тиск виглядає стабільним.</string>
+
+    <!-- Health Connect -->
+    <string name="section_health">Сон і активність</string>
+    <string name="health_sleep">Сон перед нападом</string>
+    <string name="health_steps">Кроків за добу до нападу</string>
+    <string name="health_resting_hr">Пульс у спокої</string>
+    <string name="health_bpm">%1$d уд/хв</string>
+    <string name="health_none">Даних із годинника для цього запису поки немає. Вони можуть з\'явитися після синхронізації годинника.</string>
+    <string name="health_refresh">Оновити дані з годинника</string>
+    <string name="health_failed">Дані не знайдено. Перевірте, що годинник синхронізувався з Health Connect і доступ дозволено.</string>
+    <string name="settings_health">Дані з годинника (Health Connect)</string>
+    <string name="health_switch">Читати сон і активність із Health Connect</string>
+    <string name="health_switch_desc">Додає до кожного нападу сон минулої ночі, кроки та пульс у спокої, наприклад із годинників Nothing або CMF, які синхронізуються з Health Connect. Застосунок лише читає ці дані, зберігає їх на телефоні й нікуди не надсилає.</string>
+    <string name="health_permission_denied">Доступ до Health Connect не надано</string>
+    <string name="health_update_required">Спершу оновіть або встановіть Health Connect у Google Play</string>
+    <string name="health_unavailable">Health Connect недоступний на цьому телефоні</string>
+    <string name="health_rationale_title">Навіщо застосунку Health Connect</string>
+    <string name="health_rationale_body">Щоденник головного болю читає з Health Connect ваш сон, кроки та пульс у спокої, щоб показати, що було перед нападом, і перевірити, чи пов\'язані ваші головні болі з короткими ночами або малою активністю. Дані використовуються лише на цьому телефоні, нікуди не надсилаються й не записуються назад. Доступ можна відкликати будь-коли в налаштуваннях Health Connect.</string>
+    <string name="close">Закрити</string>
+    <string name="health_stats_title">Сон і активність</string>
+    <string name="health_stats_no_data">За цей період немає даних із годинника для нападів. Увімкніть читання в налаштуваннях.</string>
+    <string name="health_stats_avg_sleep">Середній сон перед нападом: %1$s (нападів із даними: %2$d)</string>
+    <string name="health_stats_short_sleep">Нападів після ночі коротшої за 6 годин: %1$d із %2$d (%3$d%%)</string>
+    <string name="health_stats_short_baseline">Для порівняння: ночі коротші за 6 годин становлять %1$d%% усіх ночей за той самий період</string>
+    <string name="health_verdict_few">Поки замало даних: потрібно хоча б 5 нападів із даними про сон.</string>
+    <string name="health_verdict_more">За вашими записами напади помітно частіше йдуть після коротких ночей, ніж зазвичай. Можливо, сон — один із ваших провокаторів; варто обговорити це з лікарем.</string>
+    <string name="health_verdict_none">Явного зв\'язку нападів із короткими ночами поки не видно.</string>
+    <string name="health_stats_steps">Кроків за добу до нападу: у середньому %1$s (у звичайний день: %2$s)</string>
+    <string name="health_stats_hr">Пульс у спокої перед нападом: у середньому %1$d (зазвичай: %2$s)</string>
+    <string name="health_stats_note">Це лише статистична підказка за вашими записами, а не діагноз.</string>
+
+    <!-- Health Connect: doctor report -->
+    <string name="report_avg_sleep">Середній сон перед нападом: %1$s</string>
+    <string name="report_short_sleep">Нападів після ночі коротшої за 6 годин: %1$d із %2$d</string>
+    <string name="report_health">Сон і активність: %1$s</string>
+    <string name="report_sleep">сон перед нападом %1$s</string>
+    <string name="report_steps">кроків за попередню добу: %1$s</string>
+    <string name="report_resting_hr">пульс у спокої: %1$d</string>
+
+    <!-- Weather: doctor report -->
+    <string name="report_sharp_pressure">Нападів при перепаді тиску 3 гПа і більше за 3 години: %1$d із %2$d</string>
+    <string name="report_weather">Погода: %1$s</string>
+    <string name="report_pressure">тиск %1$s</string>
+    <string name="weather_change_inline">за 3 год: %1$s</string>
+
+    <!-- App lock -->
+    <string name="settings_privacy">Конфіденційність</string>
+    <string name="lock_switch">Вимагати розблокування</string>
+    <string name="lock_switch_desc">Просить відбиток пальця або код блокування екрана під час відкриття застосунку і знову, якщо він був згорнутий довше 30 секунд. Також ховає застосунок зі знімків екрана та списку нещодавніх. Віджети й кнопки в сповіщеннях працюють без розблокування.</string>
+    <string name="lock_need_screen_lock">Спершу налаштуйте блокування екрана на телефоні</string>
+    <string name="lock_title">Щоденник головного болю заблоковано</string>
+    <string name="lock_unlock">Розблокувати</string>
+    <string name="lock_prompt_title">Розблокувати щоденник</string>
+    <string name="lock_prompt_subtitle">Підтвердьте, що це ви, щоб відкрити щоденник</string>
+
+    <!-- Automatic backup -->
+    <string name="auto_backup_title">Автоматична копія в папку</string>
+    <string name="auto_backup_desc">Щоночі зберігає файл резервної копії у вибрану папку, наприклад у папку, яку синхронізує хмарний диск. Зберігаються 7 останніх файлів.</string>
+    <string name="auto_backup_folder">Папка: %1$s</string>
+    <string name="auto_backup_last_ok">Остання копія: %1$s</string>
+    <string name="auto_backup_last_failed">Остання спроба не вдалася: %1$s. Перевірте, що папка ще існує.</string>
+    <string name="auto_backup_now">Зробити копію зараз</string>
+    <string name="auto_backup_change">Змінити папку</string>
+    <string name="auto_backup_off">Вимкнути</string>
+    <string name="auto_backup_choose">Вибрати папку</string>
+
+    <!-- Week widget -->
+    <string name="week_widget_description">Останні 7 днів і кнопка «Без болю сьогодні»</string>
+    <string name="week_widget_mark">Без болю сьогодні</string>
+    <string name="week_widget_unmark">Зняти позначку за сьогодні</string>
+    <string name="week_widget_has_entry">Сьогодні вже є запис</string>
+
+    <!-- Day factors -->
+    <string name="factors_title">Чинники дня</string>
+    <string name="factors_fill">Заповнити</string>
+    <string name="factors_edit">Змінити</string>
+    <string name="factors_hide">Сховати</string>
+    <string name="factors_hint">Позначте, що було цього дня, з головним болем чи без нього. З часом застосунок порівняє дні з болем і без болю.</string>
+    <string name="factors_stress">Стрес</string>
+    <string name="stress_none">Немає</string>
+    <string name="stress_moderate">Помірний</string>
+    <string name="stress_high">Сильний</string>
+    <string name="factors_caffeine">Чашок кави або інших напоїв із кофеїном</string>
+    <string name="factors_alcohol">Алкоголь</string>
+    <string name="factors_low_water">Мало води</string>
+    <string name="factors_skipped_meal">Пропущений прийом їжі</string>
+    <string name="factor_high_stress">Сильний стрес</string>
+    <string name="factor_moderate_stress">Помірний стрес</string>
+    <string name="factor_caffeine">3 і більше напоїв із кофеїном</string>
+    <string name="factors_stats_title">Чинники дня</string>
+    <string name="factors_stats_logged">Заповнено днів за період: %1$d</string>
+    <string name="factors_stats_no_data">Поки замало даних: для порівняння потрібно хоча б %1$d заповнених днів із чинником і стільки ж без нього.</string>
+    <string name="factors_stats_row">%1$s: біль був у %2$d%% таких днів (без цього — у %3$d%%; днів: %4$d і %5$d)</string>
+    <string name="factors_stats_note">Це порівняння ваших днів, а не доказ причини: різні чинники часто йдуть разом.</string>
+
+    <!-- Cycle -->
+    <string name="cycle_switch">Враховувати цикл</string>
+    <string name="cycle_switch_desc">Читає дати менструацій із Health Connect, якщо ви ним користуєтеся, і перевіряє, чи припадають напади на період від 2 днів до початку до 3 днів після. За замовчуванням вимкнено; дані залишаються на цьому телефоні.</string>
+    <string name="health_cycle">Близько початку менструації</string>
+    <string name="yes">Так</string>
+    <string name="no">Ні</string>
+    <string name="cycle_stats_title">Цикл</string>
+    <string name="cycle_stats_no_data">За цей період немає нападів із даними про цикл.</string>
+    <string name="cycle_stats_attacks">Нападів у період від 2 днів до початку до 3 днів після початку менструації: %1$d із %2$d (%3$d%%)</string>
+    <string name="cycle_stats_baseline">Для порівняння: такі дні становлять %1$d%% усіх днів за той самий період</string>
+    <string name="cycle_verdict_few">Поки замало даних: потрібно хоча б 5 нападів із даними про цикл.</string>
+    <string name="cycle_verdict_more">За вашими записами напади помітно частіше припадають на час близько початку менструації, ніж зазвичай. Можливо, варто обговорити це з лікарем.</string>
+    <string name="cycle_verdict_none">Явного зв\'язку нападів із циклом поки не видно.</string>
+    <string name="cycle_stats_note">Це лише статистична підказка за вашими записами, а не діагноз.</string>
+    <string name="report_cycle">Нападів у період від 2 днів до початку до 3 днів після початку менструації: %1$d із %2$d</string>
+
+    <!-- Doctor report chart -->
+    <string name="report_chart_title">За період</string>
+    <string name="report_chart_note">На графіку останні %1$d дн.</string>
+    <string name="report_chart_legend_pain">сила болю (0–10)</string>
+    <string name="report_chart_legend_pressure">тиск, %1$s</string>
+    <string name="report_chart_legend_free">день без болю</string>
+</resources>
