@@ -180,7 +180,8 @@
     <string name="import_failed">Не удалось прочитать файл. Выберите резервную копию, созданную этим приложением.</string>
     <string name="settings_about">О приложении</string>
     <string name="about_version">Версия %1$s</string>
-    <string name="about_privacy">Все данные хранятся только на этом телефоне. Ничего никуда не отправляется, пока вы сами не поделитесь отчётом или резервной копией.</string>
+    <string name="about_privacy">Все записи хранятся только на этом телефоне и никуда не отправляются, пока вы сами не поделитесь отчётом или резервной копией. Если включить запись погоды, в сервис погоды уходят только примерные координаты.</string>
+    <string name="about_weather_source">Данные о погоде: Open-Meteo.com, запасной источник — MET Norway (api.met.no). Поиск города: Open-Meteo и OpenStreetMap.</string>
 
     <!-- Doctor report -->
     <string name="report_dialog_title">Отчёт для врача</string>
@@ -221,4 +222,63 @@
     <string name="widget_status_hint">Нажмите, когда начнётся боль</string>
     <string name="toast_started">Записано: боль с %1$s</string>
     <string name="toast_ended">Боль прошла. Длилась %1$s</string>
+
+    <!-- Weather: settings -->
+    <string name="settings_weather">Погода и давление</string>
+    <string name="weather_switch">Записывать погоду при каждом приступе</string>
+    <string name="weather_switch_desc">Использует примерное местоположение и бесплатный сервис Open-Meteo, чтобы сохранить температуру и атмосферное давление в момент приступа. Отправляются только координаты, округлённые до ~1 км; ваши записи никуда не уходят.</string>
+    <string name="weather_permission_denied">Нет доступа к местоположению. Укажите свой город ниже.</string>
+    <string name="weather_city_hint">Город</string>
+    <string name="weather_city_find">Найти</string>
+    <string name="weather_city_set">Используется город: %1$s</string>
+    <string name="weather_city_not_found">Город не найден</string>
+    <string name="weather_city_use_location">Использовать моё местоположение</string>
+    <string name="weather_location_ok">Местоположение определено (примерно)</string>
+    <string name="weather_location_none">Местоположение пока не определено. Откройте приложение с включённой геолокацией</string>
+    <string name="pressure_unit">Единицы давления</string>
+    <string name="unit_mmhg">мм рт. ст.</string>
+    <string name="unit_hpa">гПа</string>
+
+    <!-- Weather: editor -->
+    <string name="section_weather">Погода в это время</string>
+    <string name="weather_temperature">Температура</string>
+    <string name="weather_conditions">Состояние</string>
+    <string name="weather_pressure">Давление</string>
+    <string name="weather_change_3h">Изменение за 3 ч</string>
+    <string name="weather_change_24h">Изменение за 24 ч</string>
+    <string name="weather_humidity">Влажность</string>
+    <string name="weather_none">Для этой записи погода ещё не записана.</string>
+    <string name="weather_refresh">Обновить погоду</string>
+    <string name="weather_loading">Загружаю…</string>
+    <string name="weather_no_location">Не удалось определить местоположение. Включите геолокацию на телефоне или укажите город в настройках.</string>
+    <string name="weather_no_network">Не удалось связаться с сервисом погоды. Проверьте подключение к интернету.</string>
+
+    <!-- Weather conditions -->
+    <string name="wx_clear">Ясно</string>
+    <string name="wx_partly">Переменная облачность</string>
+    <string name="wx_cloudy">Пасмурно</string>
+    <string name="wx_fog">Туман</string>
+    <string name="wx_drizzle">Морось</string>
+    <string name="wx_rain">Дождь</string>
+    <string name="wx_snow">Снег</string>
+    <string name="wx_thunder">Гроза</string>
+
+    <!-- Weather: statistics -->
+    <string name="weather_stats_title">Погода и давление</string>
+    <string name="weather_stats_no_data">За этот период нет приступов с данными о погоде. Включите запись погоды в настройках.</string>
+    <string name="weather_stats_attacks">Приступов с данными о погоде за последние %2$d дн.: %1$d</string>
+    <string name="weather_stats_avg_pressure">Среднее давление во время приступов: %1$s</string>
+    <string name="weather_stats_sharp">Перед %1$d из %2$d приступов давление менялось на 3 гПа (≈2 мм рт. ст.) и больше за 3 часа (%3$d%%)</string>
+    <string name="weather_stats_baseline">Для сравнения: такие перепады бывают в %1$d%% всех часов за тот же период</string>
+    <string name="weather_stats_baseline_loading">Сравниваю с обычной погодой…</string>
+    <string name="weather_stats_verdict_few">Пока мало данных: нужно хотя бы 5 записей с погодой.</string>
+    <string name="weather_stats_verdict_more">По вашим записям приступы заметно чаще случаются при перепадах давления, чем обычно. Возможно, вы метеозависимы — стоит обсудить это с врачом.</string>
+    <string name="weather_stats_verdict_none">Явной связи приступов с перепадами давления пока не видно.</string>
+    <string name="weather_stats_note">Это лишь статистическая подсказка по вашим записям, а не диагноз.</string>
+
+    <!-- Weather: doctor report -->
+    <string name="report_sharp_pressure">Приступов при перепаде давления 3 гПа и больше за 3 часа: %1$d из %2$d</string>
+    <string name="report_weather">Погода: %1$s</string>
+    <string name="report_pressure">давление %1$s</string>
+    <string name="weather_change_inline">за 3 ч: %1$s</string>
 </resources>

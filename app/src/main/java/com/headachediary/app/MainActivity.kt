@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -122,6 +123,9 @@ fun App(
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
     val editing = editingId?.let { id -> entries.firstOrNull { it.id == id } }
 
+    // При запуске обновляем запомненное местоположение: виджету в фоне Android живые координаты не отдаёт.
+    LaunchedEffect(Unit) { vm.refreshLocation() }
+
     if (editingId != null) {
         // Пока только что созданная запись ещё не пришла из базы, показываем пустой экран.
         if (editing != null) {
@@ -133,6 +137,8 @@ fun App(
                     editingId = null
                 },
                 onClose = { editingId = null },
+                onEnsureWeather = { vm.ensureWeather(editing) },
+                onRefreshWeather = { done -> vm.refreshWeather(editing.id, done) },
             )
         }
         return

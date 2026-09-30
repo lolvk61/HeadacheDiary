@@ -180,7 +180,8 @@
     <string name="import_failed">Could not read the file. Choose a backup created by this app.</string>
     <string name="settings_about">About</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_privacy">All data is stored only on this phone. Nothing is sent anywhere unless you share a report or a backup yourself.</string>
+    <string name="about_privacy">All entries are stored only on this phone. They are never sent anywhere unless you share a report or a backup yourself. If you turn on weather recording, only approximate coordinates are sent to a weather service.</string>
+    <string name="about_weather_source">Weather data: Open-Meteo.com, with MET Norway (api.met.no) as a backup. City search: Open-Meteo and OpenStreetMap.</string>
 
     <!-- Doctor report -->
     <string name="report_dialog_title">Report for your doctor</string>
@@ -221,4 +222,63 @@
     <string name="widget_status_hint">Tap when a headache starts</string>
     <string name="toast_started">Logged: headache from %1$s</string>
     <string name="toast_ended">Pain is over. It lasted %1$s</string>
+
+    <!-- Weather: settings -->
+    <string name="settings_weather">Weather and pressure</string>
+    <string name="weather_switch">Record weather with each attack</string>
+    <string name="weather_switch_desc">Uses your approximate location and the free Open-Meteo service to save the temperature and air pressure at the time of an attack. Only coordinates rounded to about 1 km are sent; your entries are never sent.</string>
+    <string name="weather_permission_denied">No access to your location. Enter your city below instead.</string>
+    <string name="weather_city_hint">City</string>
+    <string name="weather_city_find">Find</string>
+    <string name="weather_city_set">Using city: %1$s</string>
+    <string name="weather_city_not_found">City not found</string>
+    <string name="weather_city_use_location">Use my location instead</string>
+    <string name="weather_location_ok">Location is set (approximate)</string>
+    <string name="weather_location_none">Location not determined yet. Open the app outdoors or with location turned on</string>
+    <string name="pressure_unit">Pressure units</string>
+    <string name="unit_mmhg">mm Hg</string>
+    <string name="unit_hpa">hPa</string>
+
+    <!-- Weather: editor -->
+    <string name="section_weather">Weather at that time</string>
+    <string name="weather_temperature">Temperature</string>
+    <string name="weather_conditions">Conditions</string>
+    <string name="weather_pressure">Pressure</string>
+    <string name="weather_change_3h">Change over 3 h</string>
+    <string name="weather_change_24h">Change over 24 h</string>
+    <string name="weather_humidity">Humidity</string>
+    <string name="weather_none">Weather has not been recorded for this entry yet.</string>
+    <string name="weather_refresh">Update weather</string>
+    <string name="weather_loading">Loading…</string>
+    <string name="weather_no_location">Could not determine your location. Turn on location on the phone or enter your city in Settings.</string>
+    <string name="weather_no_network">Could not reach the weather service. Check the internet connection.</string>
+
+    <!-- Weather conditions -->
+    <string name="wx_clear">Clear</string>
+    <string name="wx_partly">Partly cloudy</string>
+    <string name="wx_cloudy">Overcast</string>
+    <string name="wx_fog">Fog</string>
+    <string name="wx_drizzle">Drizzle</string>
+    <string name="wx_rain">Rain</string>
+    <string name="wx_snow">Snow</string>
+    <string name="wx_thunder">Thunderstorm</string>
+
+    <!-- Weather: statistics -->
+    <string name="weather_stats_title">Weather and pressure</string>
+    <string name="weather_stats_no_data">No attacks with weather data in this period yet. Turn on weather recording in Settings.</string>
+    <string name="weather_stats_attacks">Attacks with weather data over the last %2$d days: %1$d</string>
+    <string name="weather_stats_avg_pressure">Average pressure during attacks: %1$s</string>
+    <string name="weather_stats_sharp">Pressure changed by 3 hPa (about 2 mm Hg) or more within 3 hours before %1$d of %2$d attacks (%3$d%%)</string>
+    <string name="weather_stats_baseline">For comparison, such swings happen in %1$d%% of all hours in the same period</string>
+    <string name="weather_stats_baseline_loading">Comparing with the usual weather…</string>
+    <string name="weather_stats_verdict_few">Not enough data yet: at least 5 entries with weather are needed.</string>
+    <string name="weather_stats_verdict_more">By your entries, attacks happen noticeably more often during pressure swings than usual. You may be weather-sensitive — worth discussing with a doctor.</string>
+    <string name="weather_stats_verdict_none">No clear link between attacks and pressure swings is visible so far.</string>
+    <string name="weather_stats_note">This is only a statistical hint from your own entries, not a diagnosis.</string>
+
+    <!-- Weather: doctor report -->
+    <string name="report_sharp_pressure">Attacks with a pressure change of 3 hPa or more within 3 hours: %1$d of %2$d</string>
+    <string name="report_weather">Weather: %1$s</string>
+    <string name="report_pressure">pressure %1$s</string>
+    <string name="weather_change_inline">change over 3 h: %1$s</string>
 </resources>

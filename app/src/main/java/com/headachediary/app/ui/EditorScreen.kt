@@ -1,5 +1,6 @@
 package com.headachediary.app.ui
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +59,8 @@ import com.headachediary.app.data.SymptomGroup
 import com.headachediary.app.data.Trigger
 import com.headachediary.app.data.toKeySet
 import com.headachediary.app.data.toggle
+import com.headachediary.app.settings.AppSettings
+import com.headachediary.app.weather.WeatherOutcome
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -66,8 +70,16 @@ fun EditorScreen(
     onSave: (HeadacheEntry) -> Unit,
     onDelete: () -> Unit,
     onClose: () -> Unit,
+    onEnsureWeather: () -> Unit,
+    onRefreshWeather: ((WeatherOutcome) -> Unit) -> Unit,
 ) {
     val context = LocalContext.current
+    val weatherEnabled = AppSettings.weatherEnabled(context)
+    var refreshingWeather by remember { mutableStateOf(false) }
+
+    // Если запись открыта без погоды (например, не было сети), пробуем дописать её один раз.
+    LaunchedEffect(entry.id) { onEnsureWeather() }
+
     var start by remember(entry.id) { mutableLongStateOf(entry.startTime) }
     var end by remember(entry.id) { mutableStateOf(entry.endTime) }
     var type by remember(entry.id) { mutableStateOf(HeadacheType.fromKey(entry.type)) }
@@ -159,6 +171,61 @@ fun EditorScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+            }
+
+            if (weatherEnabled || entry.pressure != null || entry.temperature != null) {
+                SectionCard(stringResource(R.string.section_weather)) {
+                    val hasWeather = entry.pressure != null || entry.temperature != null
+                    if (hasWeather) {
+                        entry.temperature?.let {
+                            WeatherRow(stringResource(R.string.weather_temperature), formatTemperature(context, it))
+                        }
+                        entry.weatherCode?.let {
+                            WeatherRow(stringResource(R.string.weather_conditions), stringResource(weatherLabelRes(it)))
+                        }
+                        entry.pressure?.let {
+                            WeatherRow(stringResource(R.string.weather_pressure), formatPressure(context, it))
+                        }
+                        entry.pressureChange3h?.let {
+                            WeatherRow(stringResource(R.string.weather_change_3h), formatPressureChange(context, it))
+                        }
+                        entry.pressureChange24h?.let {
+                            WeatherRow(stringResource(R.string.weather_change_24h), formatPressureChange(context, it))
+                        }
+                        entry.humidity?.let {
+                            WeatherRow(stringResource(R.string.weather_humidity), "$it%")
+                        }
+                    } else {
+                        Text(
+                            stringResource(R.string.weather_none),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (weatherEnabled) {
+                        TextButton(
+                            enabled = !refreshingWeather,
+                            onClick = {
+                                refreshingWeather = true
+                                onRefreshWeather { outcome ->
+                                    refreshingWeather = false
+                                    val message = when (outcome) {
+                                        WeatherOutcome.NO_LOCATION -> R.string.weather_no_location
+                                        WeatherOutcome.NO_DATA -> R.string.weather_no_network
+                                        else -> null
+                                    }
+                                    if (message != null) {
+                                        Toast.makeText(context, context.getString(message), Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            },
+                        ) {
+                            Text(
+                                stringResource(if (refreshingWeather) R.string.weather_loading else R.string.weather_refresh),
+                            )
+                        }
+                    }
                 }
             }
 
@@ -288,6 +355,14 @@ fun EditorScreen(
                 TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) }
             },
         )
+    }
+}
+
+@Composable
+private fun WeatherRow(label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
     }
 }
 

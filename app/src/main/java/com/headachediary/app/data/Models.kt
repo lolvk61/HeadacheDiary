@@ -22,7 +22,20 @@ data class HeadacheEntry(
     val medication: String = "",
     val medicationHelped: String = "",
     val notes: String = "",
+    // Погода на момент начала приступа (давление в гПа, температура в °C); null — не записана.
+    val temperature: Double? = null,
+    val pressure: Double? = null,
+    val pressureChange3h: Double? = null,
+    val pressureChange24h: Double? = null,
+    val humidity: Int? = null,
+    val weatherCode: Int? = null,
 )
+
+/** Перепад давления за 3 часа, начиная с которого считаем его заметным (в гПа; ≈ 2,3 мм рт. ст.). */
+const val SHARP_PRESSURE_CHANGE_HPA = 3.0
+
+fun HeadacheEntry.hasSharpPressureChange(): Boolean =
+    pressureChange3h?.let { kotlin.math.abs(it) >= SHARP_PRESSURE_CHANGE_HPA } == true
 
 enum class HeadacheType(@StringRes val labelRes: Int) {
     MIGRAINE(R.string.type_migraine),

@@ -8,6 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.headachediary.app.data.AppDatabase
 import com.headachediary.app.data.Backup
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.settings.AppSettings
+import com.headachediary.app.weather.LocationHelper
+import com.headachediary.app.weather.WeatherOutcome
+import com.headachediary.app.weather.WeatherService
 import com.headachediary.app.widget.PainWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,7 +37,29 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val id = dao.insert(HeadacheEntry(startTime = time))
             PainWidget.updateAll(context)
             onCreated(id)
+            // Запись уже сохранена со временем; погода дописывается следом, если функция включена.
+            WeatherService.attach(context, id)
         }
+    }
+
+    /** Обновляет запомненное местоположение при запуске, пока приложение на экране и Android отдаёт координаты. */
+    fun refreshLocation(force: Boolean = false, onDone: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            if (!force && !AppSettings.weatherEnabled(context)) return@launch
+            val coords = if (force) LocationHelper.refresh(context) else LocationHelper.best(context, maxAgeMs = 60 * 60 * 1000L)
+            onDone(coords != null)
+        }
+    }
+
+    /** Открытая запись без погоды: пробуем дописать её (например, если раньше не было сети). */
+    fun ensureWeather(entry: HeadacheEntry) {
+        // Записи без изменения давления (например, полученные только из запасного источника) пробуем дополнить.
+        if (entry.pressureChange3h != null) return
+        viewModelScope.launch { WeatherService.attach(context, entry.id) }
+    }
+
+    fun refreshWeather(entryId: Long, onDone: (WeatherOutcome) -> Unit) {
+        viewModelScope.launch { onDone(WeatherService.attach(context, entryId, force = true)) }
     }
 
     fun save(entry: HeadacheEntry) {

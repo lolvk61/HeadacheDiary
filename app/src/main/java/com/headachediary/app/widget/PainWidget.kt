@@ -18,27 +18,32 @@ import com.headachediary.app.ui.formatDateTime
 import com.headachediary.app.ui.formatDuration
 import com.headachediary.app.ui.formatTime
 import com.headachediary.app.ui.isOngoing
+import com.headachediary.app.weather.WeatherService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+
+/** Результат нажатия на виджет: текст для тоста и id новой записи (если начат новый приступ). */
+data class ToggleResult(val message: String, val startedId: Long?)
 
 object PainWidget {
-    /** Записывает начало боли или, если приступ идёт, его окончание. Возвращает текст для тоста. */
-    suspend fun toggle(context: Context): String {
+    /** Записывает начало боли или, если приступ идёт, его окончание. */
+    suspend fun toggle(context: Context): ToggleResult {
         val ctx = context.localized()
         val dao = AppDatabase.get(context).dao()
         val latest = dao.latest()
         val now = System.currentTimeMillis()
-        val message = if (latest != null && latest.isOngoing(now)) {
+        val result = if (latest != null && latest.isOngoing(now)) {
             dao.update(latest.copy(endTime = now))
-            ctx.getString(R.string.toast_ended, formatDuration(ctx, now - latest.startTime))
+            ToggleResult(ctx.getString(R.string.toast_ended, formatDuration(ctx, now - latest.startTime)), null)
         } else {
-            dao.insert(HeadacheEntry(startTime = now))
-            ctx.getString(R.string.toast_started, formatTime(now))
+            val id = dao.insert(HeadacheEntry(startTime = now))
+            ToggleResult(ctx.getString(R.string.toast_started, formatTime(now)), id)
         }
         updateAll(context)
-        return message
+        return result
     }
 
     suspend fun updateAll(context: Context) {
@@ -98,6 +103,8 @@ class PainWidgetProvider : AppWidgetProvider() {
     }
 }
 
+private const val WEATHER_TIMEOUT_MS = 9_000L
+
 /** Не экспортируется: срабатывает только от нажатия на кнопку виджета этого приложения. */
 class PainToggleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -105,9 +112,13 @@ class PainToggleReceiver : BroadcastReceiver() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val message = PainWidget.toggle(appContext)
+                val result = PainWidget.toggle(appContext)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(appContext, message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(appContext, result.message, Toast.LENGTH_SHORT).show()
+                }
+                // Время уже записано и показано; погода дописывается после, в пределах времени, отпущенного приёмнику.
+                result.startedId?.let { id ->
+                    withTimeoutOrNull(WEATHER_TIMEOUT_MS) { WeatherService.attach(appContext, id) }
                 }
             } finally {
                 pending.finish()

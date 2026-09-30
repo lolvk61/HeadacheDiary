@@ -72,6 +72,14 @@ fun EntryCard(entry: HeadacheEntry, onClick: () -> Unit) {
                         )
                     }
                 }
+                weatherSummary(context, entry)?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
+                }
                 val symptoms = entry.symptoms.symptomLabels(context)
                 if (symptoms.isNotEmpty()) {
                     val shown = symptoms.take(3).joinToString(", ")

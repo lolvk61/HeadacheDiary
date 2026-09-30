@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -35,7 +36,12 @@ import androidx.compose.ui.unit.dp
 import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.computeStats
+import com.headachediary.app.data.hasSharpPressureChange
+import com.headachediary.app.settings.AppSettings
+import com.headachediary.app.weather.WeatherClient
+import com.headachediary.app.weather.WeatherService
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 @Composable
 fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
@@ -91,6 +97,7 @@ fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
         }
 
         PainBars(entries)
+        WeatherCard(entries, windowDays = minOf(days, WeatherClient.MAX_PAST_DAYS))
         RankCard(
             stringResource(R.string.rank_triggers),
             stats.topTriggers.map { (t, n) -> context.getString(t.labelRes) to n },
@@ -163,6 +170,96 @@ private fun PainBars(entries: List<HeadacheEntry>) {
         }
     }
 }
+
+/** Доля «обычных» часов с перепадом давления; null внутри — данные недоступны. */
+private data class Baseline(val share: Double?)
+
+/**
+ * Сравнивает погоду в моменты приступов с обычной погодой в том же месте за тот же период:
+ * только так видно, случаются ли приступы при перепадах давления чаще, чем «по случайности».
+ */
+@Composable
+private fun WeatherCard(entries: List<HeadacheEntry>, windowDays: Int) {
+    val context = LocalContext.current
+    val enabled = AppSettings.weatherEnabled(context)
+    val since = System.currentTimeMillis() - windowDays * DAY_MS
+    val inWindow = entries.filter { it.startTime >= since }
+    val withWeather = inWindow.filter { it.pressureChange3h != null }
+    if (!enabled && inWindow.none { it.pressure != null }) return
+
+    val baseline by produceState<Baseline?>(null, windowDays, enabled, withWeather.size) {
+        value = null
+        value = Baseline(if (enabled && withWeather.isNotEmpty()) WeatherService.baselineShare(context, windowDays) else null)
+    }
+
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.weather_stats_title), style = MaterialTheme.typography.titleMedium)
+            if (withWeather.isEmpty()) {
+                Text(
+                    stringResource(R.string.weather_stats_no_data),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                return@Column
+            }
+
+            val sharp = withWeather.count { it.hasSharpPressureChange() }
+            val attackShare = sharp.toDouble() / withWeather.size
+            val avgPressure = withWeather.mapNotNull { it.pressure }.average()
+            val baselineShare = baseline?.share
+
+            Text(
+                stringResource(R.string.weather_stats_attacks, withWeather.size, windowDays),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            if (!avgPressure.isNaN()) {
+                Text(
+                    stringResource(R.string.weather_stats_avg_pressure, formatPressure(context, avgPressure)),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Text(
+                stringResource(R.string.weather_stats_sharp, sharp, withWeather.size, (attackShare * 100).roundToInt()),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            when {
+                baseline == null -> Text(
+                    stringResource(R.string.weather_stats_baseline_loading),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                baselineShare != null -> Text(
+                    stringResource(R.string.weather_stats_baseline, (baselineShare * 100).roundToInt()),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+
+            val verdict = when {
+                withWeather.size < MIN_ATTACKS_FOR_VERDICT -> R.string.weather_stats_verdict_few
+                baselineShare == null -> null
+                attackShare >= 0.3 && attackShare >= 1.5 * baselineShare -> R.string.weather_stats_verdict_more
+                else -> R.string.weather_stats_verdict_none
+            }
+            if (verdict != null) {
+                Text(
+                    stringResource(verdict),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+            Text(
+                stringResource(R.string.weather_stats_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+private const val MIN_ATTACKS_FOR_VERDICT = 5
 
 @Composable
 private fun RankCard(title: String, items: List<Pair<String, Int>>) {

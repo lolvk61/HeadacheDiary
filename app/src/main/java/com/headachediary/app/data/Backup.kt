@@ -6,7 +6,7 @@ import org.json.JSONObject
 /** Резервная копия в формате JSON: переносится между телефонами и читается человеком. */
 object Backup {
     private const val APP_ID = "HeadacheDiary"
-    private const val FORMAT_VERSION = 1
+    private const val FORMAT_VERSION = 2
     private const val MAX_TEXT = 5_000
 
     fun toJson(entries: List<HeadacheEntry>, exportedAt: Long = System.currentTimeMillis()): String {
@@ -23,6 +23,12 @@ object Backup {
                     put("medication", e.medication)
                     put("medicationHelped", e.medicationHelped)
                     put("notes", e.notes)
+                    e.temperature?.let { put("temperature", it) }
+                    e.pressure?.let { put("pressure", it) }
+                    e.pressureChange3h?.let { put("pressureChange3h", it) }
+                    e.pressureChange24h?.let { put("pressureChange24h", it) }
+                    e.humidity?.let { put("humidity", it) }
+                    e.weatherCode?.let { put("weatherCode", it) }
                 },
             )
         }
@@ -33,6 +39,10 @@ object Backup {
             .put("entries", array)
             .toString(2)
     }
+
+    /** Число из поля JSON или null, если поля нет или в нём не число. */
+    private fun JSONObject.optNumber(name: String): Double? =
+        if (has(name) && !isNull(name)) optDouble(name, Double.NaN).takeIf { !it.isNaN() } else null
 
     /** Разбирает файл резервной копии. Бросает исключение, если файл не от этого приложения. */
     fun parse(text: String): List<HeadacheEntry> {
@@ -60,6 +70,12 @@ object Backup {
                     MedHelp.entries.any { it.name == key }
                 }.orEmpty(),
                 notes = o.optString("notes").take(MAX_TEXT),
+                temperature = o.optNumber("temperature"),
+                pressure = o.optNumber("pressure"),
+                pressureChange3h = o.optNumber("pressureChange3h"),
+                pressureChange24h = o.optNumber("pressureChange24h"),
+                humidity = o.optNumber("humidity")?.toInt(),
+                weatherCode = o.optNumber("weatherCode")?.toInt(),
             )
         }
     }

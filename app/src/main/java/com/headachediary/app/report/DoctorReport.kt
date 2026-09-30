@@ -17,16 +17,21 @@ import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
 import com.headachediary.app.data.MedHelp
 import com.headachediary.app.data.computeStats
+import com.headachediary.app.data.hasSharpPressureChange
 import com.headachediary.app.data.symptomLabels
 import com.headachediary.app.data.triggerLabels
 import com.headachediary.app.ui.DAY_MS
 import com.headachediary.app.ui.appLocale
 import com.headachediary.app.ui.formatDate
 import com.headachediary.app.ui.formatDuration
+import com.headachediary.app.ui.formatPressure
+import com.headachediary.app.ui.formatPressureChange
+import com.headachediary.app.ui.formatTemperature
 import com.headachediary.app.ui.formatTime
 import com.headachediary.app.ui.intensityLabelRes
 import com.headachediary.app.ui.painColor
 import com.headachediary.app.ui.toLocalDate
+import com.headachediary.app.ui.weatherLabelRes
 import java.io.File
 import java.io.FileOutputStream
 import java.time.format.DateTimeFormatter
@@ -101,6 +106,16 @@ object DoctorReport {
                 ),
             )
         }
+        val withPressure = list.filter { it.pressureChange3h != null }
+        if (withPressure.isNotEmpty()) {
+            bullet(
+                context.getString(
+                    R.string.report_sharp_pressure,
+                    withPressure.count { it.hasSharpPressureChange() },
+                    withPressure.size,
+                ),
+            )
+        }
         val medDaysLast30 = computeStats(select(allEntries, 30, now)).medDays
         if (medDaysLast30 >= 10) {
             w.spacer(4f)
@@ -127,6 +142,7 @@ object DoctorReport {
             val lines = mutableListOf<Pair<CharSequence, TextPaint>>()
             lines += "${dayFmt.format(e.startTime.toLocalDate())}, $timeText" to boldPaint
             lines += "$type · $intensityText" to bodyPaint
+            weatherLine(context, e)?.let { lines += context.getString(R.string.report_weather, it) to bodyPaint }
             e.symptoms.symptomLabels(context).takeIf { it.isNotEmpty() }?.let {
                 lines += context.getString(R.string.report_symptoms, it.joinToString(", ")) to bodyPaint
             }
@@ -157,6 +173,21 @@ object DoctorReport {
         FileOutputStream(file).use { doc.writeTo(it) }
         doc.close()
         return file
+    }
+
+    /** «+12 °C, пасмурно, давление 758 мм рт. ст. (за 3 ч: −2,3 мм рт. ст.)» или null, если погоды нет. */
+    private fun weatherLine(context: Context, e: HeadacheEntry): String? {
+        val parts = mutableListOf<String>()
+        e.temperature?.let { parts += formatTemperature(context, it) }
+        e.weatherCode?.let { parts += context.getString(weatherLabelRes(it)).lowercase(context.appLocale()) }
+        e.pressure?.let { pressure ->
+            var text = context.getString(R.string.report_pressure, formatPressure(context, pressure))
+            e.pressureChange3h?.let { change ->
+                text += " (${context.getString(R.string.weather_change_inline, formatPressureChange(context, change))})"
+            }
+            parts += text
+        }
+        return parts.takeIf { it.isNotEmpty() }?.joinToString(", ")
     }
 
     fun share(context: Context, file: File) {

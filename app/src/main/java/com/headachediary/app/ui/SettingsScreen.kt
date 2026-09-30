@@ -1,5 +1,6 @@
 package com.headachediary.app.ui
 
+import android.Manifest
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -9,20 +10,27 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -33,7 +41,14 @@ import com.headachediary.app.MainViewModel
 import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.settings.AppLanguage
+import com.headachediary.app.settings.AppSettings
+import com.headachediary.app.settings.PressureUnit
 import com.headachediary.app.settings.ThemeMode
+import com.headachediary.app.weather.LocationHelper
+import com.headachediary.app.weather.WeatherClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -49,8 +64,48 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     var showReport by remember { mutableStateOf(false) }
+    var weatherOn by remember { mutableStateOf(AppSettings.weatherEnabled(context)) }
+    var pressureUnit by remember { mutableStateOf(AppSettings.pressureUnit(context)) }
+    var hasLocation by remember { mutableStateOf(LocationHelper.hasAny(context)) }
+    var place by remember { mutableStateOf(LocationHelper.manualPlace(context)) }
+    var cityQuery by remember { mutableStateOf("") }
+    var searching by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     fun toast(message: String) = Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+
+    fun enableWeather() {
+        AppSettings.setWeatherEnabled(context, true)
+        weatherOn = true
+        vm.refreshLocation(force = true) { _ -> hasLocation = LocationHelper.hasAny(context) }
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { result ->
+        // Без доступа к геолокации погоду всё равно можно включить: достаточно указать город.
+        if (result.values.none { it }) toast(context.getString(R.string.weather_permission_denied))
+        enableWeather()
+    }
+
+    fun searchCity() {
+        if (cityQuery.isBlank() || searching) return
+        searching = true
+        scope.launch {
+            val found = withContext(Dispatchers.IO) {
+                runCatching { WeatherClient.geocode(cityQuery, context.appLocale().language) }.getOrNull()
+            }
+            searching = false
+            if (found == null) {
+                toast(context.getString(R.string.weather_city_not_found))
+            } else {
+                LocationHelper.setManualPlace(context, found)
+                place = found
+                hasLocation = true
+                cityQuery = ""
+            }
+        }
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json"),
@@ -131,6 +186,98 @@ fun SettingsScreen(
             }
         }
 
+        SectionCard(stringResource(R.string.settings_weather)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    stringResource(R.string.weather_switch),
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Switch(
+                    checked = weatherOn,
+                    onCheckedChange = { on ->
+                        when {
+                            !on -> {
+                                AppSettings.setWeatherEnabled(context, false)
+                                weatherOn = false
+                            }
+                            LocationHelper.hasPermission(context) -> enableWeather()
+                            else -> locationPermissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                ),
+                            )
+                        }
+                    },
+                )
+            }
+            Text(
+                stringResource(R.string.weather_switch_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (weatherOn) {
+                val currentPlace = place
+                if (currentPlace != null) {
+                    Text(
+                        stringResource(R.string.weather_city_set, currentPlace.name),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    TextButton(onClick = {
+                        LocationHelper.setManualPlace(context, null)
+                        place = null
+                        hasLocation = LocationHelper.hasAny(context)
+                        vm.refreshLocation(force = true) { _ -> hasLocation = LocationHelper.hasAny(context) }
+                    }) { Text(stringResource(R.string.weather_city_use_location)) }
+                } else {
+                    Text(
+                        stringResource(if (hasLocation) R.string.weather_location_ok else R.string.weather_location_none),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedTextField(
+                        value = cityQuery,
+                        onValueChange = { cityQuery = it },
+                        label = { Text(stringResource(R.string.weather_city_hint)) },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Button(onClick = ::searchCity, enabled = cityQuery.isNotBlank() && !searching) {
+                        Text(stringResource(R.string.weather_city_find))
+                    }
+                }
+            }
+            Text(
+                stringResource(R.string.pressure_unit),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PressureUnit.entries.forEach { unit ->
+                    FilterChip(
+                        selected = pressureUnit == unit,
+                        onClick = {
+                            AppSettings.setPressureUnit(context, unit)
+                            pressureUnit = unit
+                        },
+                        label = { Text(stringResource(unit.labelRes)) },
+                    )
+                }
+            }
+        }
+
         SectionCard(stringResource(R.string.settings_data)) {
             ActionRow(
                 stringResource(R.string.action_doctor_report),
@@ -156,6 +303,11 @@ fun SettingsScreen(
             Text(stringResource(R.string.about_version, version), style = MaterialTheme.typography.bodyMedium)
             Text(
                 stringResource(R.string.about_privacy),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                stringResource(R.string.about_weather_source),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
