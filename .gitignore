@@ -8,3 +8,6 @@ app/build/
 keystore.properties
 *.jks
 *.keystore
+app/release/
+*.apk
+*.aab
