@@ -72,6 +72,9 @@ dependencies {
 
     // Разблокировка отпечатком или кодом экрана блокировки.
     implementation("androidx.biometric:biometric:1.1.0")
+    // biometric 1.1.0 тянет fragment 1.2.5, а со старым fragment любой системный диалог (выбор файла, запрос разрешения)
+    // падает с «Can only use lower 16 bits for requestCode». Поэтому версия fragment задана явно.
+    implementation("androidx.fragment:fragment:1.8.5")
     // Запись автоматических копий в выбранную папку.
     implementation("androidx.documentfile:documentfile:1.0.1")
 
