@@ -77,6 +77,35 @@ object WeatherService {
         return fetched.outcome
     }
 
+    private var cachedOutlook: Triple<Long, Double, PressureOutlook?>? = null
+
+    /**
+     * Ожидаемый перепад давления в ближайшие 24 часа. Результат кэшируется на полчаса: экран журнала
+     * открывается часто, а прогноз меняется медленно. Null — прогноз получить не удалось.
+     */
+    suspend fun pressureOutlook(context: Context): PressureOutlook? = withContext(Dispatchers.IO) {
+        val coords = LocationHelper.best(context) ?: return@withContext null
+        val now = System.currentTimeMillis()
+        cachedOutlook?.let { (savedAt, lat, outlook) ->
+            if (now - savedAt < OUTLOOK_CACHE_MS && lat == coords.lat) return@withContext outlook
+        }
+        val result = coroutineScope {
+            val primary = async {
+                runCatching { WeatherClient.outlook(WeatherClient.fetchForecast(coords.lat, coords.lon), now) }
+                    .onFailure { Log.w(TAG, "Open-Meteo forecast failed", it) }.getOrNull()
+            }
+            val fallback = async {
+                runCatching { WeatherClient.outlook(WeatherClient.fetchForecastFallback(coords.lat, coords.lon), now) }
+                    .onFailure { Log.w(TAG, "MET Norway forecast failed", it) }.getOrNull()
+            }
+            primary.await() ?: fallback.await()
+        }
+        if (result != null) cachedOutlook = Triple(now, coords.lat, result)
+        result
+    }
+
+    private const val OUTLOOK_CACHE_MS = 30L * 60 * 1000
+
     /** Доля «обычных» часов с заметным перепадом давления за последние [days] дней; null — нет данных. */
     suspend fun baselineShare(context: Context, days: Int): Double? = withContext(Dispatchers.IO) {
         val coords = LocationHelper.best(context) ?: return@withContext null

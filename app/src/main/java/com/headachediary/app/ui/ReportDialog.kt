@@ -41,7 +41,7 @@ private val periods = listOf(
 
 /** Выбор периода и создание PDF-отчёта для врача. */
 @Composable
-fun DoctorReportDialog(entries: List<HeadacheEntry>, onDismiss: () -> Unit) {
+fun DoctorReportDialog(entries: List<HeadacheEntry>, painFreeDays: Set<Long>, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var period by remember { mutableIntStateOf(90) }
@@ -78,7 +78,7 @@ fun DoctorReportDialog(entries: List<HeadacheEntry>, onDismiss: () -> Unit) {
                         busy = true
                         scope.launch {
                             val file = withContext(Dispatchers.IO) {
-                                runCatching { DoctorReport.build(context, entries, days) }.getOrNull()
+                                runCatching { DoctorReport.build(context, entries, painFreeDays, days) }.getOrNull()
                             }
                             busy = false
                             if (file != null) {

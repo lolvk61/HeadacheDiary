@@ -276,6 +276,44 @@
     <string name="weather_stats_verdict_none">No clear link between attacks and pressure swings is visible so far.</string>
     <string name="weather_stats_note">This is only a statistical hint from your own entries, not a diagnosis.</string>
 
+    <!-- Pain-free days -->
+    <string name="journal_today_ask">No headache today?</string>
+    <string name="journal_today_marked">Today is marked as pain-free</string>
+    <string name="journal_mark_pain_free">Mark</string>
+    <string name="undo">Undo</string>
+    <string name="legend_pain_free">pain-free</string>
+    <string name="cal_marked_pain_free">This day is marked as pain-free.</string>
+    <string name="cal_mark_pain_free">Mark as pain-free</string>
+    <string name="cal_unmark">Remove the mark</string>
+    <string name="stat_tracked">Days tracked: %1$d (headache: %2$d, pain-free: %3$d)</string>
+    <string name="report_pain_free_days">Days marked as pain-free: %1$d</string>
+    <string name="toast_pain_free_marked">Marked: no headache today</string>
+
+    <!-- Reminders and pressure alerts -->
+    <string name="settings_reminders">Reminders and warnings</string>
+    <string name="reminder_switch">Evening reminder</string>
+    <string name="reminder_switch_desc">Asks whether you had a headache today, so days without pain are recorded too. It is not sent if you have already logged the day.</string>
+    <string name="reminder_time">Time: %1$s (tap to change)</string>
+    <string name="forecast_switch">Warn about pressure swings</string>
+    <string name="forecast_switch_desc">Every morning checks the forecast and warns you if a sharp pressure change is expected. If your entries show that swings rarely precede your attacks, it stays quiet. Needs weather recording to be on.</string>
+    <string name="forecast_needs_weather">Turn on weather recording first</string>
+    <string name="notif_permission_denied">Notifications are blocked. Allow them in the phone settings to get reminders.</string>
+    <string name="ch_reminder">Evening reminder</string>
+    <string name="ch_forecast">Pressure warnings</string>
+    <string name="reminder_title">How was your day?</string>
+    <string name="reminder_text">Did you have a headache today?</string>
+    <string name="action_no_pain">No headache</string>
+    <string name="action_had_pain">Had a headache</string>
+    <string name="alert_title">Pressure swing expected</string>
+    <string name="alert_fall">Around %2$s the pressure is expected to drop by about %1$s within 3 hours.</string>
+    <string name="alert_rise">Around %2$s the pressure is expected to rise by about %1$s within 3 hours.</string>
+    <string name="alert_personal">%1$d of your %2$d attacks with weather data came after such swings, so take extra care today.</string>
+    <string name="alert_generic">Some people get headaches during such swings, so keep an eye on how you feel.</string>
+    <string name="alert_unlikely">By your entries such swings rarely came before your attacks, so it may not affect you.</string>
+    <string name="outlook_swing_title">Pressure swing expected in the next 24 hours</string>
+    <string name="outlook_calm_title">Pressure outlook</string>
+    <string name="outlook_calm_text">Pressure looks steady over the next 24 hours.</string>
+
     <!-- Weather: doctor report -->
     <string name="report_sharp_pressure">Attacks with a pressure change of 3 hPa or more within 3 hours: %1$d of %2$d</string>
     <string name="report_weather">Weather: %1$s</string>

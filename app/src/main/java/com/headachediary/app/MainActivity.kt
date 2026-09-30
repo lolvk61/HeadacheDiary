@@ -1,6 +1,7 @@
 package com.headachediary.app
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -33,6 +34,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.headachediary.app.reminders.Notifications
+import com.headachediary.app.reminders.ReminderScheduler
 import com.headachediary.app.settings.AppLanguage
 import com.headachediary.app.settings.AppSettings
 import com.headachediary.app.settings.ThemeMode
@@ -52,13 +55,30 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        /** Ключ дополнительного значения интента: сразу открыть новую запись о боли. */
+        const val EXTRA_NEW_ENTRY = "com.headachediary.app.NEW_ENTRY"
+    }
+
+    /** Кнопка «Была боль» в уведомлении просит сразу открыть новую запись. */
+    private var newEntryRequest by mutableStateOf(false)
+
     /** Подменяем контекст, чтобы интерфейс использовал язык, выбранный в настройках приложения. */
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(newBase.localized())
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra(EXTRA_NEW_ENTRY, false)) newEntryRequest = true
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Notifications.ensureChannels(this)
+        ReminderScheduler.scheduleAll(this)
+        if (savedInstanceState == null && intent.getBooleanExtra(EXTRA_NEW_ENTRY, false)) newEntryRequest = true
         setContent {
             var themeMode by remember { mutableStateOf(AppSettings.themeMode(this@MainActivity)) }
             val darkTheme = when (themeMode) {
@@ -86,6 +106,8 @@ class MainActivity : ComponentActivity() {
                         themeMode = it
                         AppSettings.setThemeMode(this@MainActivity, it)
                     },
+                    newEntryRequest = newEntryRequest,
+                    onNewEntryHandled = { newEntryRequest = false },
                     language = AppSettings.language(this@MainActivity),
                     onLanguageChange = {
                         AppSettings.setLanguage(this@MainActivity, it)
@@ -114,14 +136,25 @@ private val tabs = listOf(
 fun App(
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
+    newEntryRequest: Boolean,
+    onNewEntryHandled: () -> Unit,
     language: AppLanguage,
     onLanguageChange: (AppLanguage) -> Unit,
     vm: MainViewModel = viewModel(),
 ) {
     val entries by vm.entries.collectAsStateWithLifecycle()
+    val painFreeDays by vm.painFreeDays.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
     val editing = editingId?.let { id -> entries.firstOrNull { it.id == id } }
+
+    // Кнопка «Была боль» в уведомлении: сразу создаём запись со временем «сейчас» и открываем её.
+    LaunchedEffect(newEntryRequest) {
+        if (newEntryRequest) {
+            vm.startNow { id -> editingId = id }
+            onNewEntryHandled()
+        }
+    }
 
     // При запуске обновляем запомненное местоположение: виджету в фоне Android живые координаты не отдаёт.
     LaunchedEffect(Unit) { vm.refreshLocation() }
@@ -163,24 +196,31 @@ fun App(
         when (tab) {
             0 -> JournalScreen(
                 entries = entries,
+                painFreeDays = painFreeDays,
                 // Время фиксируется в момент нажатия, затем сразу открывается форма деталей.
                 onPainNow = { vm.startNow { id -> editingId = id } },
                 onOpen = { editingId = it.id },
                 onEnd = vm::endNow,
+                onMarkPainFree = vm::markPainFree,
+                onUnmarkPainFree = vm::unmarkPainFree,
                 modifier = m,
             )
             1 -> CalendarScreen(
                 entries = entries,
+                painFreeDays = painFreeDays,
                 onOpen = { editingId = it.id },
                 onAddForDate = { date: LocalDate ->
                     val time = if (date == LocalDate.now()) LocalTime.now() else LocalTime.NOON
                     vm.addAt(date.atTime(time).toMillis()) { id -> editingId = id }
                 },
+                onMarkPainFree = vm::markPainFree,
+                onUnmarkPainFree = vm::unmarkPainFree,
                 modifier = m,
             )
-            2 -> StatsScreen(entries = entries, modifier = m)
+            2 -> StatsScreen(entries = entries, painFreeDays = painFreeDays, modifier = m)
             else -> SettingsScreen(
                 entries = entries,
+                painFreeDays = painFreeDays,
                 vm = vm,
                 themeMode = themeMode,
                 onThemeChange = onThemeChange,

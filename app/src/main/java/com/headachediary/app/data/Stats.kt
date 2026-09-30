@@ -14,6 +14,21 @@ data class PeriodStats(
     val topSymptoms: List<Pair<Symptom, Int>>,
 )
 
+/** Насколько перепады давления связаны с приступами по записям пользователя. */
+data class PressureRelevance(val sharp: Int, val total: Int) {
+    /** Достаточно ли записей с погодой, чтобы говорить о личной связи. */
+    val known: Boolean get() = total >= 5
+    val share: Double get() = if (total == 0) 0.0 else sharp.toDouble() / total
+
+    /** Перепады, судя по записям, почти не предшествуют приступам — предупреждать о них незачем. */
+    val unlikely: Boolean get() = known && share < 0.15
+}
+
+fun pressureRelevance(entries: List<HeadacheEntry>): PressureRelevance {
+    val withData = entries.filter { it.pressureChange3h != null }
+    return PressureRelevance(withData.count { it.hasSharpPressureChange() }, withData.size)
+}
+
 fun computeStats(list: List<HeadacheEntry>): PeriodStats {
     fun daysWhere(predicate: (HeadacheEntry) -> Boolean) =
         list.filter(predicate).map { it.startTime.toLocalDate() }.distinct().size

@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.annotation.StringRes
 import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.data.PressureRelevance
 import com.headachediary.app.data.SHARP_PRESSURE_CHANGE_HPA
 import com.headachediary.app.settings.AppSettings
 import com.headachediary.app.settings.PressureUnit
+import com.headachediary.app.weather.PressureOutlook
 import kotlin.math.roundToInt
 
 private const val MMHG_PER_HPA = 0.750062
@@ -23,6 +25,30 @@ fun formatPressure(context: Context, hPa: Double): String {
 fun formatPressureChange(context: Context, deltaHpa: Double): String {
     val unit = AppSettings.pressureUnit(context)
     return String.format(context.appLocale(), "%+.1f %s", convert(unit, deltaHpa), context.getString(unit.labelRes))
+}
+
+/** Величина изменения давления без знака, например «2,3 мм рт. ст.». */
+fun formatPressureAmount(context: Context, deltaHpa: Double): String {
+    val unit = AppSettings.pressureUnit(context)
+    return String.format(context.appLocale(), "%.1f %s", convert(unit, deltaHpa), context.getString(unit.labelRes))
+}
+
+/**
+ * Текст предупреждения о перепаде: что ожидается и как это связано с приступами самого пользователя.
+ * Общий для уведомления и карточки на главном экране.
+ */
+fun outlookMessage(context: Context, outlook: PressureOutlook, relevance: PressureRelevance): String {
+    val head = context.getString(
+        if (outlook.changeHpa < 0) R.string.alert_fall else R.string.alert_rise,
+        formatPressureAmount(context, kotlin.math.abs(outlook.changeHpa)),
+        formatTime(outlook.atMs),
+    )
+    val tail = when {
+        relevance.unlikely -> context.getString(R.string.alert_unlikely)
+        relevance.known -> context.getString(R.string.alert_personal, relevance.sharp, relevance.total)
+        else -> context.getString(R.string.alert_generic)
+    }
+    return "$head $tail"
 }
 
 fun formatTemperature(context: Context, celsius: Double): String =

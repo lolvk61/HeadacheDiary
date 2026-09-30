@@ -44,12 +44,13 @@ import java.time.LocalDate
 import kotlin.math.roundToInt
 
 @Composable
-fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
+fun StatsScreen(entries: List<HeadacheEntry>, painFreeDays: Set<Long>, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var days by rememberSaveable { mutableIntStateOf(30) }
     var showReport by remember { mutableStateOf(false) }
     val since = System.currentTimeMillis() - days * DAY_MS
     val stats = computeStats(entries.filter { it.startTime >= since })
+    val markedPainFree = painFreeDays.count { it >= since.toLocalDate().toEpochDay() }
 
     Column(
         modifier.verticalScroll(rememberScrollState()).padding(16.dp),
@@ -84,6 +85,12 @@ fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
             )
             StatTile(stringResource(R.string.stat_med_days), stats.medDays.toString(), Modifier.weight(1f))
         }
+
+        Text(
+            stringResource(R.string.stat_tracked, stats.painDays + markedPainFree, stats.painDays, markedPainFree),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         if (days == 30 && stats.medDays >= 10) {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
@@ -120,7 +127,7 @@ fun StatsScreen(entries: List<HeadacheEntry>, modifier: Modifier = Modifier) {
         )
     }
 
-    if (showReport) DoctorReportDialog(entries) { showReport = false }
+    if (showReport) DoctorReportDialog(entries, painFreeDays) { showReport = false }
 }
 
 /** Столбики по дням за последние 30 дней: высота и цвет зависят от силы боли. */

@@ -1,7 +1,9 @@
 package com.headachediary.app.ui
 
 import android.Manifest
+import android.app.TimePickerDialog
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import com.headachediary.app.MainViewModel
 import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.reminders.Notifications
+import com.headachediary.app.reminders.ReminderScheduler
 import com.headachediary.app.settings.AppLanguage
 import com.headachediary.app.settings.AppSettings
 import com.headachediary.app.settings.PressureUnit
@@ -55,6 +59,7 @@ import java.time.LocalDate
 @Composable
 fun SettingsScreen(
     entries: List<HeadacheEntry>,
+    painFreeDays: Set<Long>,
     vm: MainViewModel,
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
@@ -71,8 +76,49 @@ fun SettingsScreen(
     var cityQuery by remember { mutableStateOf("") }
     var searching by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var reminderOn by remember { mutableStateOf(AppSettings.reminderEnabled(context)) }
+    var reminderMinutes by remember { mutableStateOf(AppSettings.reminderMinutes(context)) }
+    var forecastOn by remember { mutableStateOf(AppSettings.forecastAlertEnabled(context)) }
 
     fun toast(message: String) = Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+
+    fun setReminder(on: Boolean) {
+        AppSettings.setReminderEnabled(context, on)
+        reminderOn = on
+        ReminderScheduler.scheduleAll(context)
+    }
+
+    fun setForecast(on: Boolean) {
+        AppSettings.setForecastAlertEnabled(context, on)
+        forecastOn = on
+        ReminderScheduler.scheduleAll(context)
+    }
+
+    // Какой переключатель ждёт результата запроса права на уведомления (с Android 13 оно обязательно).
+    var pendingNotificationSwitch by remember { mutableStateOf<String?>(null) }
+    val notificationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val which = pendingNotificationSwitch
+        pendingNotificationSwitch = null
+        if (!granted) {
+            toast(context.getString(R.string.notif_permission_denied))
+        } else if (which == "reminder") {
+            setReminder(true)
+        } else if (which == "forecast") {
+            setForecast(true)
+        }
+    }
+
+    /** Включает переключатель, предварительно запросив право на уведомления, если оно нужно. */
+    fun requestNotificationsThen(which: String, enable: () -> Unit) {
+        if (Notifications.canPost(context)) {
+            enable()
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pendingNotificationSwitch = which
+            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            toast(context.getString(R.string.notif_permission_denied))
+        }
+    }
 
     fun enableWeather() {
         AppSettings.setWeatherEnabled(context, true)
@@ -278,6 +324,80 @@ fun SettingsScreen(
             }
         }
 
+        SectionCard(stringResource(R.string.settings_reminders)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    stringResource(R.string.reminder_switch),
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Switch(
+                    checked = reminderOn,
+                    onCheckedChange = { on ->
+                        if (on) requestNotificationsThen("reminder") { setReminder(true) } else setReminder(false)
+                    },
+                )
+            }
+            Text(
+                stringResource(R.string.reminder_switch_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (reminderOn) {
+                TextButton(onClick = {
+                    TimePickerDialog(
+                        context,
+                        { _, hour, minute ->
+                            reminderMinutes = hour * 60 + minute
+                            AppSettings.setReminderMinutes(context, reminderMinutes)
+                            ReminderScheduler.scheduleAll(context)
+                        },
+                        reminderMinutes / 60,
+                        reminderMinutes % 60,
+                        true,
+                    ).show()
+                }) {
+                    Text(
+                        stringResource(
+                            R.string.reminder_time,
+                            String.format(context.appLocale(), "%02d:%02d", reminderMinutes / 60, reminderMinutes % 60),
+                        ),
+                    )
+                }
+            }
+            HorizontalDivider()
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    stringResource(R.string.forecast_switch),
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Switch(
+                    checked = forecastOn,
+                    onCheckedChange = { on ->
+                        when {
+                            !on -> setForecast(false)
+                            !weatherOn -> toast(context.getString(R.string.forecast_needs_weather))
+                            else -> requestNotificationsThen("forecast") { setForecast(true) }
+                        }
+                    },
+                )
+            }
+            Text(
+                stringResource(R.string.forecast_switch_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
         SectionCard(stringResource(R.string.settings_data)) {
             ActionRow(
                 stringResource(R.string.action_doctor_report),
@@ -314,7 +434,7 @@ fun SettingsScreen(
         }
     }
 
-    if (showReport) DoctorReportDialog(entries) { showReport = false }
+    if (showReport) DoctorReportDialog(entries, painFreeDays) { showReport = false }
 }
 
 @Composable

@@ -276,6 +276,44 @@
     <string name="weather_stats_verdict_none">Явной связи приступов с перепадами давления пока не видно.</string>
     <string name="weather_stats_note">Это лишь статистическая подсказка по вашим записям, а не диагноз.</string>
 
+    <!-- Pain-free days -->
+    <string name="journal_today_ask">Сегодня без боли?</string>
+    <string name="journal_today_marked">Сегодня отмечено как день без боли</string>
+    <string name="journal_mark_pain_free">Отметить</string>
+    <string name="undo">Отменить</string>
+    <string name="legend_pain_free">без боли</string>
+    <string name="cal_marked_pain_free">Этот день отмечен как день без боли.</string>
+    <string name="cal_mark_pain_free">Отметить день без боли</string>
+    <string name="cal_unmark">Снять отметку</string>
+    <string name="stat_tracked">Отслежено дней: %1$d (с болью: %2$d, без боли: %3$d)</string>
+    <string name="report_pain_free_days">Дней, отмеченных как «без боли»: %1$d</string>
+    <string name="toast_pain_free_marked">Отмечено: сегодня без боли</string>
+
+    <!-- Reminders and pressure alerts -->
+    <string name="settings_reminders">Напоминания и предупреждения</string>
+    <string name="reminder_switch">Вечернее напоминание</string>
+    <string name="reminder_switch_desc">Спрашивает, была ли сегодня головная боль, чтобы дни без боли тоже записывались. Не приходит, если день уже отмечен.</string>
+    <string name="reminder_time">Время: %1$s (нажмите, чтобы изменить)</string>
+    <string name="forecast_switch">Предупреждать о перепадах давления</string>
+    <string name="forecast_switch_desc">Каждое утро проверяет прогноз и предупреждает, если ожидается резкий перепад давления. Если по вашим записям такие перепады редко предшествуют приступам, приложение молчит. Нужна включённая запись погоды.</string>
+    <string name="forecast_needs_weather">Сначала включите запись погоды</string>
+    <string name="notif_permission_denied">Уведомления запрещены. Разрешите их в настройках телефона, чтобы получать напоминания.</string>
+    <string name="ch_reminder">Вечернее напоминание</string>
+    <string name="ch_forecast">Предупреждения о давлении</string>
+    <string name="reminder_title">Как прошёл день?</string>
+    <string name="reminder_text">Была ли сегодня головная боль?</string>
+    <string name="action_no_pain">Боли не было</string>
+    <string name="action_had_pain">Была боль</string>
+    <string name="alert_title">Ожидается перепад давления</string>
+    <string name="alert_fall">Около %2$s давление упадёт примерно на %1$s за 3 часа.</string>
+    <string name="alert_rise">Около %2$s давление вырастет примерно на %1$s за 3 часа.</string>
+    <string name="alert_personal">Перед %1$d из ваших %2$d приступов с данными о погоде были такие перепады, так что сегодня берегите себя.</string>
+    <string name="alert_generic">У некоторых людей в такие моменты болит голова, так что следите за самочувствием.</string>
+    <string name="alert_unlikely">По вашим записям такие перепады редко предшествовали приступам, так что, возможно, на вас это не влияет.</string>
+    <string name="outlook_swing_title">В ближайшие сутки ожидается перепад давления</string>
+    <string name="outlook_calm_title">Прогноз давления</string>
+    <string name="outlook_calm_text">В ближайшие сутки давление выглядит стабильным.</string>
+
     <!-- Weather: doctor report -->
     <string name="report_sharp_pressure">Приступов при перепаде давления 3 гПа и больше за 3 часа: %1$d из %2$d</string>
     <string name="report_weather">Погода: %1$s</string>

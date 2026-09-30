@@ -3,13 +3,20 @@ package com.headachediary.app.data
 import org.json.JSONArray
 import org.json.JSONObject
 
+/** Содержимое резервной копии: приступы и дни, отмеченные как «без боли». */
+data class BackupData(val entries: List<HeadacheEntry>, val painFreeDays: List<Long>)
+
 /** Резервная копия в формате JSON: переносится между телефонами и читается человеком. */
 object Backup {
     private const val APP_ID = "HeadacheDiary"
-    private const val FORMAT_VERSION = 2
+    private const val FORMAT_VERSION = 3
     private const val MAX_TEXT = 5_000
 
-    fun toJson(entries: List<HeadacheEntry>, exportedAt: Long = System.currentTimeMillis()): String {
+    fun toJson(
+        entries: List<HeadacheEntry>,
+        painFreeDays: List<Long>,
+        exportedAt: Long = System.currentTimeMillis(),
+    ): String {
         val array = JSONArray()
         entries.sortedBy { it.startTime }.forEach { e ->
             array.put(
@@ -32,11 +39,14 @@ object Backup {
                 },
             )
         }
+        val days = JSONArray()
+        painFreeDays.sorted().forEach { days.put(it) }
         return JSONObject()
             .put("app", APP_ID)
             .put("version", FORMAT_VERSION)
             .put("exportedAt", exportedAt)
             .put("entries", array)
+            .put("painFreeDays", days)
             .toString(2)
     }
 
@@ -45,14 +55,14 @@ object Backup {
         if (has(name) && !isNull(name)) optDouble(name, Double.NaN).takeIf { !it.isNaN() } else null
 
     /** Разбирает файл резервной копии. Бросает исключение, если файл не от этого приложения. */
-    fun parse(text: String): List<HeadacheEntry> {
+    fun parse(text: String): BackupData {
         val root = JSONObject(text)
         require(root.optString("app") == APP_ID) { "Not a Headache Diary backup" }
         val array = root.getJSONArray("entries")
         val knownSymptoms = Symptom.entries.map { it.name }.toSet()
         val knownTriggers = Trigger.entries.map { it.name }.toSet()
 
-        return (0 until array.length()).map { i ->
+        val entries = (0 until array.length()).map { i ->
             val o = array.getJSONObject(i)
             HeadacheEntry(
                 startTime = o.getLong("startTime"),
@@ -78,5 +88,14 @@ object Backup {
                 weatherCode = o.optNumber("weatherCode")?.toInt(),
             )
         }
+
+        // Копии старых версий не содержат этого поля — тогда отмеченных дней просто нет.
+        val daysArray = root.optJSONArray("painFreeDays")
+        val painFreeDays = if (daysArray == null) {
+            emptyList()
+        } else {
+            (0 until daysArray.length()).map { daysArray.getLong(it) }
+        }
+        return BackupData(entries, painFreeDays)
     }
 }

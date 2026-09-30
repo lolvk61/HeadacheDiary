@@ -30,6 +30,9 @@ object AppSettings {
     private const val KEY_LANGUAGE = "language"
     private const val KEY_WEATHER = "weather"
     private const val KEY_PRESSURE_UNIT = "pressure_unit"
+    private const val KEY_REMINDER = "reminder"
+    private const val KEY_REMINDER_MINUTES = "reminder_minutes"
+    private const val KEY_FORECAST_ALERT = "forecast_alert"
 
     fun themeMode(context: Context): ThemeMode {
         val key = context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString(KEY_THEME, null)
@@ -55,6 +58,30 @@ object AppSettings {
 
     fun setWeatherEnabled(context: Context, enabled: Boolean) {
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_WEATHER, enabled).apply()
+    }
+
+    /** Вечернее напоминание «была ли сегодня боль?». */
+    fun reminderEnabled(context: Context): Boolean =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getBoolean(KEY_REMINDER, false)
+
+    fun setReminderEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_REMINDER, enabled).apply()
+    }
+
+    /** Время напоминания в минутах от полуночи; по умолчанию 21:00. */
+    fun reminderMinutes(context: Context): Int =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getInt(KEY_REMINDER_MINUTES, 21 * 60)
+
+    fun setReminderMinutes(context: Context, minutes: Int) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putInt(KEY_REMINDER_MINUTES, minutes).apply()
+    }
+
+    /** Утреннее предупреждение о ожидаемом перепаде давления. */
+    fun forecastAlertEnabled(context: Context): Boolean =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getBoolean(KEY_FORECAST_ALERT, false)
+
+    fun setForecastAlertEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(KEY_FORECAST_ALERT, enabled).apply()
     }
 
     /** Единицы давления; если не выбраны, для русского языка — мм рт. ст., для остальных — гПа. */

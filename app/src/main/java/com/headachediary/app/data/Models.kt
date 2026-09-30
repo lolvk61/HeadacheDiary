@@ -31,6 +31,10 @@ data class HeadacheEntry(
     val weatherCode: Int? = null,
 )
 
+/** День (число дней от 1970-01-01 по местному календарю), который пользователь отметил как «без боли». */
+@Entity(tableName = "pain_free_days")
+data class PainFreeDay(@PrimaryKey val day: Long)
+
 /** Перепад давления за 3 часа, начиная с которого считаем его заметным (в гПа; ≈ 2,3 мм рт. ст.). */
 const val SHARP_PRESSURE_CHANGE_HPA = 3.0
 

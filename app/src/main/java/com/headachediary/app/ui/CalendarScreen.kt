@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -24,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -50,11 +53,15 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as DateTextStyle
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CalendarScreen(
     entries: List<HeadacheEntry>,
+    painFreeDays: Set<Long>,
     onOpen: (HeadacheEntry) -> Unit,
     onAddForDate: (LocalDate) -> Unit,
+    onMarkPainFree: (Long) -> Unit,
+    onUnmarkPainFree: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -123,6 +130,7 @@ fun CalendarScreen(
                         DayCell(
                             day = day,
                             dayEntries = byDay[date].orEmpty(),
+                            painFree = date.toEpochDay() in painFreeDays,
                             isToday = date == today,
                             isSelected = date.toEpochDay() == selectedEpochDay,
                             onClick = { selectedEpochDay = date.toEpochDay() },
@@ -135,14 +143,15 @@ fun CalendarScreen(
             }
         }
 
-        Row(
+        FlowRow(
             Modifier.padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             LegendDot(painColor(2), stringResource(R.string.legend_weak))
             LegendDot(painColor(5), stringResource(R.string.legend_medium))
             LegendDot(painColor(8), stringResource(R.string.legend_strong))
+            LegendDot(PainFreeColor, stringResource(R.string.legend_pain_free))
             Text(stringResource(R.string.legend_migraine), style = MaterialTheme.typography.labelSmall)
         }
 
@@ -151,18 +160,28 @@ fun CalendarScreen(
             Text(formatDayHeader(context, selected), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             val list = byDay[selected].orEmpty()
+            val selectedDay = selected.toEpochDay()
+            val marked = selectedDay in painFreeDays
             if (list.isEmpty()) {
                 Text(
-                    stringResource(R.string.cal_no_pain),
+                    stringResource(if (marked) R.string.cal_marked_pain_free else R.string.cal_no_pain),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (marked) PainFreeColor else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 list.forEach { EntryCard(it, onClick = { onOpen(it) }) }
             }
             Spacer(Modifier.height(12.dp))
-            Button(onClick = { onAddForDate(selected) }) { Text(stringResource(R.string.cal_add_for_day)) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Button(onClick = { onAddForDate(selected) }) { Text(stringResource(R.string.cal_add_for_day)) }
+                // Отметить можно только день без записей; будущие дни отмечать нельзя.
+                if (list.isEmpty() && !selected.isAfter(today)) {
+                    TextButton(onClick = { if (marked) onUnmarkPainFree(selectedDay) else onMarkPainFree(selectedDay) }) {
+                        Text(stringResource(if (marked) R.string.cal_unmark else R.string.cal_mark_pain_free))
+                    }
+                }
+            }
         }
     }
 }
@@ -171,6 +190,7 @@ fun CalendarScreen(
 private fun DayCell(
     day: Int,
     dayEntries: List<HeadacheEntry>,
+    painFree: Boolean,
     isToday: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
@@ -179,7 +199,11 @@ private fun DayCell(
     val shape = CircleShape
     val hasPain = dayEntries.isNotEmpty()
     val maxIntensity = dayEntries.mapNotNull { it.intensity }.maxOrNull()
-    val bg = if (hasPain) painColor(maxIntensity) else Color.Transparent
+    val bg = when {
+        hasPain -> painColor(maxIntensity)
+        painFree -> PainFreeColor.copy(alpha = 0.3f)
+        else -> Color.Transparent
+    }
     val fg = if (hasPain) onPainColor(maxIntensity) else MaterialTheme.colorScheme.onSurface
     val hasMigraine = dayEntries.any { it.type == HeadacheType.MIGRAINE.name }
 

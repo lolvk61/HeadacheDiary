@@ -23,6 +23,14 @@ data class WeatherSnapshot(
     val weatherCode: Int?,
 )
 
+/**
+ * Самый резкий ожидаемый перепад давления в ближайшие сутки: [changeHpa] — изменение за 3 часа,
+ * заканчивающиеся в момент [atMs]; отрицательное — давление падает.
+ */
+data class PressureOutlook(val changeHpa: Double, val atMs: Long) {
+    val isSharp: Boolean get() = abs(changeHpa) >= SHARP_PRESSURE_CHANGE_HPA
+}
+
 /** Почасовые ряды от Open-Meteo. Время — секунды Unix (UTC); пропуски — NaN. */
 class Hourly(
     val times: LongArray,
@@ -71,6 +79,47 @@ object WeatherClient {
     fun fetchRecent(lat: Double, lon: Double, days: Int): Hourly {
         val past = days.coerceIn(1, MAX_PAST_DAYS)
         return parse(httpGet("$FORECAST_URL?${coords(lat, lon)}&past_days=$past&forecast_days=1$COMMON"))
+    }
+
+    /** Прогноз на ближайшие трое суток плюс сутки истории (нужны для изменения давления за 3 часа). */
+    fun fetchForecast(lat: Double, lon: Double): Hourly =
+        parse(httpGet("$FORECAST_URL?${coords(lat, lon)}&past_days=1&forecast_days=3$COMMON"))
+
+    /** Прогноз давления от MET Norway (запасной источник); истории у него нет, только будущие часы. */
+    fun fetchForecastFallback(lat: Double, lon: Double): Hourly {
+        val root = JSONObject(httpGet(String.format(Locale.US, "$METNO_URL?lat=%.2f&lon=%.2f", lat, lon)))
+        val elevation = root.getJSONObject("geometry").getJSONArray("coordinates").optDouble(2, 0.0)
+        val series = root.getJSONObject("properties").getJSONArray("timeseries")
+        val n = minOf(series.length(), 72)
+        val nan = DoubleArray(n) { Double.NaN }
+        return Hourly(
+            times = LongArray(n) { Instant.parse(series.getJSONObject(it).getString("time")).epochSecond },
+            temperature = nan,
+            humidity = nan,
+            pressure = DoubleArray(n) {
+                val details = series.getJSONObject(it).getJSONObject("data").getJSONObject("instant").getJSONObject("details")
+                val msl = details.optDouble("air_pressure_at_sea_level", Double.NaN)
+                if (msl.isNaN()) Double.NaN else seaLevelToStation(msl, elevation)
+            },
+            weatherCode = nan,
+        )
+    }
+
+    /** Ищет самый сильный перепад давления за 3 часа среди ближайших 24 часов; null — данных нет. */
+    fun outlook(h: Hourly, nowMs: Long): PressureOutlook? {
+        var best: PressureOutlook? = null
+        for (i in 3 until h.times.size) {
+            val t = h.times[i] * 1000
+            if (t <= nowMs || t > nowMs + DAY_MS) continue
+            // Считаем только по ровно трёхчасовому промежутку (у MET Norway дальние часы идут реже).
+            if (h.times[i] - h.times[i - 3] != 3 * 3600L) continue
+            val now = h.pressure[i]
+            val before = h.pressure[i - 3]
+            if (now.isNaN() || before.isNaN()) continue
+            val change = round1(now - before)
+            if (best == null || abs(change) > abs(best.changeHpa)) best = PressureOutlook(change, t)
+        }
+        return best
     }
 
     /** Погода в час, которому принадлежит [timeMs], и изменение давления за 3 и 24 часа до него. */

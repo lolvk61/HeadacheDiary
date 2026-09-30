@@ -24,10 +24,12 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -46,6 +48,11 @@ import androidx.compose.ui.unit.sp
 import com.headachediary.app.R
 import com.headachediary.app.data.HeadacheEntry
 import com.headachediary.app.data.HeadacheType
+import com.headachediary.app.data.PressureRelevance
+import com.headachediary.app.data.pressureRelevance
+import com.headachediary.app.settings.AppSettings
+import com.headachediary.app.weather.PressureOutlook
+import com.headachediary.app.weather.WeatherService
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -54,12 +61,20 @@ import java.time.format.TextStyle as DateTextStyle
 @Composable
 fun JournalScreen(
     entries: List<HeadacheEntry>,
+    painFreeDays: Set<Long>,
     onPainNow: () -> Unit,
     onOpen: (HeadacheEntry) -> Unit,
     onEnd: (HeadacheEntry) -> Unit,
+    onMarkPainFree: (Long) -> Unit,
+    onUnmarkPainFree: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val weatherEnabled = AppSettings.weatherEnabled(context)
+    // Прогноз давления на ближайшие сутки: запрашивается в сети, поэтому появляется чуть позже остального.
+    val outlook by produceState<PressureOutlook?>(null, weatherEnabled) {
+        value = if (weatherEnabled) WeatherService.pressureOutlook(context) else null
+    }
     val now by produceState(System.currentTimeMillis()) {
         while (true) {
             delay(30_000)
@@ -74,7 +89,7 @@ fun JournalScreen(
     val painDays = last30.map { it.startTime.toLocalDate() }.distinct().size
     val migraineDays = last30.filter { it.type == HeadacheType.MIGRAINE.name }
         .map { it.startTime.toLocalDate() }.distinct().size
-    val painFreeDays = entries.firstOrNull()?.let { ChronoUnit.DAYS.between(it.startTime.toLocalDate(), today) }
+    val daysSincePain = entries.firstOrNull()?.let { ChronoUnit.DAYS.between(it.startTime.toLocalDate(), today) }
 
     LazyColumn(
         modifier = modifier,
@@ -98,6 +113,19 @@ fun JournalScreen(
 
         item { PainHero(ongoing, now, onPainNow, { ongoing?.let(onOpen) }, { ongoing?.let(onEnd) }) }
 
+        // Если сегодня записей нет, предлагаем отметить день без боли (или снять отметку).
+        if (byDay[today].isNullOrEmpty()) {
+            item {
+                TodayPainFreeCard(
+                    marked = today.toEpochDay() in painFreeDays,
+                    onMark = { onMarkPainFree(today.toEpochDay()) },
+                    onUndo = { onUnmarkPainFree(today.toEpochDay()) },
+                )
+            }
+        }
+
+        outlook?.let { o -> item { OutlookCard(o, pressureRelevance(entries)) } }
+
         if (entries.isNotEmpty()) {
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -105,12 +133,12 @@ fun JournalScreen(
                     StatTile(stringResource(R.string.tile_migraine_days), migraineDays.toString(), Modifier.weight(1f))
                     StatTile(
                         stringResource(R.string.tile_pain_free_days),
-                        painFreeDays?.toString() ?: "—",
+                        daysSincePain?.toString() ?: "—",
                         Modifier.weight(1f),
                     )
                 }
             }
-            item { WeekStrip(today, byDay) }
+            item { WeekStrip(today, byDay, painFreeDays) }
             item {
                 Text(
                     stringResource(R.string.journal_history),
@@ -220,8 +248,64 @@ private fun PainHero(
     }
 }
 
+/** Плитка «Сегодня без боли?» с одной кнопкой; после отметки показывает подтверждение и «Отменить». */
 @Composable
-private fun WeekStrip(today: LocalDate, byDay: Map<LocalDate, List<HeadacheEntry>>) {
+private fun TodayPainFreeCard(marked: Boolean, onMark: () -> Unit, onUndo: () -> Unit) {
+    Card(
+        Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = if (marked) {
+            CardDefaults.cardColors(containerColor = PainFreeColor.copy(alpha = 0.18f))
+        } else {
+            softCardColors()
+        },
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                stringResource(if (marked) R.string.journal_today_marked else R.string.journal_today_ask),
+                Modifier.weight(1f),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            TextButton(onClick = if (marked) onUndo else onMark) {
+                Text(stringResource(if (marked) R.string.undo else R.string.journal_mark_pain_free))
+            }
+        }
+    }
+}
+
+/** Прогноз давления: предупреждение о перепаде или спокойное «давление стабильно». */
+@Composable
+private fun OutlookCard(outlook: PressureOutlook, relevance: PressureRelevance) {
+    val context = LocalContext.current
+    val swing = outlook.isSharp
+    Card(
+        Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = if (swing && !relevance.unlikely) {
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+        } else {
+            softCardColors()
+        },
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                stringResource(if (swing) R.string.outlook_swing_title else R.string.outlook_calm_title),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Text(
+                if (swing) outlookMessage(context, outlook, relevance) else stringResource(R.string.outlook_calm_text),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WeekStrip(today: LocalDate, byDay: Map<LocalDate, List<HeadacheEntry>>, painFreeDays: Set<Long>) {
     val locale = LocalContext.current.appLocale()
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = softCardColors()) {
         Column(Modifier.padding(16.dp)) {
@@ -232,8 +316,17 @@ private fun WeekStrip(today: LocalDate, byDay: Map<LocalDate, List<HeadacheEntry
                     val date = today.minusDays(back.toLong())
                     val list = byDay[date].orEmpty()
                     val maxIntensity = list.mapNotNull { it.intensity }.maxOrNull()
-                    val bg = if (list.isEmpty()) MaterialTheme.colorScheme.surfaceVariant else painColor(maxIntensity)
-                    val fg = if (list.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant else onPainColor(maxIntensity)
+                    val marked = list.isEmpty() && date.toEpochDay() in painFreeDays
+                    val bg = when {
+                        list.isNotEmpty() -> painColor(maxIntensity)
+                        marked -> PainFreeColor
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    }
+                    val fg = when {
+                        list.isNotEmpty() -> onPainColor(maxIntensity)
+                        marked -> Color.White
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             date.dayOfWeek.getDisplayName(DateTextStyle.SHORT, locale),

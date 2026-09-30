@@ -80,6 +80,9 @@ fun HeadacheTheme(darkTheme: Boolean, content: @Composable () -> Unit) {
     )
 }
 
+/** Зелёный цвет дней, отмеченных как «без боли». */
+val PainFreeColor = Color(0xFF2E7D32)
+
 /** Мягкий цвет карточек: чуть отличается от фона, без тяжёлой серой заливки. */
 @Composable
 fun softCardColors(): CardColors =

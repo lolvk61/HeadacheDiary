@@ -48,7 +48,7 @@ object DoctorReport {
     fun select(entries: List<HeadacheEntry>, days: Int?, now: Long = System.currentTimeMillis()): List<HeadacheEntry> =
         entries.filter { days == null || it.startTime >= now - days * DAY_MS }.sortedBy { it.startTime }
 
-    fun build(context: Context, allEntries: List<HeadacheEntry>, days: Int?): File {
+    fun build(context: Context, allEntries: List<HeadacheEntry>, painFreeDays: Set<Long>, days: Int?): File {
         val now = System.currentTimeMillis()
         val list = select(allEntries, days, now)
         require(list.isNotEmpty()) { "No entries in the selected period" }
@@ -80,6 +80,8 @@ object DoctorReport {
         w.paragraph(context.getString(R.string.report_summary), headingPaint, after = 6f)
         fun bullet(text: String) = w.paragraph("•  $text", bodyPaint, after = 3f, indent = 6f)
         bullet(context.getString(R.string.report_pain_days, stats.painDays, periodDays))
+        val markedPainFree = painFreeDays.count { it >= from.toEpochDay() && it <= today.toEpochDay() }
+        if (markedPainFree > 0) bullet(context.getString(R.string.report_pain_free_days, markedPainFree))
         bullet(context.getString(R.string.report_attacks, stats.attacks))
         bullet(context.getString(R.string.report_migraine_days, stats.migraineDays))
         bullet(context.getString(R.string.report_tension_days, stats.tensionDays))

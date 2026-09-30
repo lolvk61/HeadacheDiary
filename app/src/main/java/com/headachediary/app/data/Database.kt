@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -26,6 +27,9 @@ interface EntryDao {
 
     @Query("SELECT * FROM entries WHERE id = :id")
     suspend fun byId(id: Long): HeadacheEntry?
+
+    @Query("SELECT COUNT(*) FROM entries WHERE startTime >= :from AND startTime < :to")
+    suspend fun countBetween(from: Long, to: Long): Int
 
     @Insert
     suspend fun insert(entry: HeadacheEntry): Long
@@ -54,9 +58,26 @@ interface EntryDao {
 
     @Delete
     suspend fun delete(entry: HeadacheEntry)
+
+    // Дни, отмеченные как «без боли»
+
+    @Query("SELECT * FROM pain_free_days")
+    fun painFreeDays(): Flow<List<PainFreeDay>>
+
+    @Query("SELECT * FROM pain_free_days")
+    suspend fun painFreeDaysOnce(): List<PainFreeDay>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun markPainFree(day: PainFreeDay)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun markPainFreeAll(days: List<PainFreeDay>)
+
+    @Query("DELETE FROM pain_free_days WHERE day = :day")
+    suspend fun unmarkPainFree(day: Long)
 }
 
-@Database(entities = [HeadacheEntry::class], version = 2, exportSchema = false)
+@Database(entities = [HeadacheEntry::class, PainFreeDay::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun dao(): EntryDao
 
@@ -78,12 +99,19 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Версия 3: таблица дней, отмеченных как «без боли». */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `pain_free_days` (`day` INTEGER NOT NULL, PRIMARY KEY(`day`))")
+            }
+        }
+
         fun get(context: Context): AppDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
                 "headache.db",
-            ).addMigrations(MIGRATION_1_2).build().also { instance = it }
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
         }
     }
 }

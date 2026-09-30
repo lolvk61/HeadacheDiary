@@ -18,6 +18,7 @@ import com.headachediary.app.ui.formatDateTime
 import com.headachediary.app.ui.formatDuration
 import com.headachediary.app.ui.formatTime
 import com.headachediary.app.ui.isOngoing
+import com.headachediary.app.ui.toLocalDate
 import com.headachediary.app.weather.WeatherService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +40,8 @@ object PainWidget {
             dao.update(latest.copy(endTime = now))
             ToggleResult(ctx.getString(R.string.toast_ended, formatDuration(ctx, now - latest.startTime)), null)
         } else {
+            // День с записью о боли не может оставаться отмеченным как «без боли».
+            dao.unmarkPainFree(now.toLocalDate().toEpochDay())
             val id = dao.insert(HeadacheEntry(startTime = now))
             ToggleResult(ctx.getString(R.string.toast_started, formatTime(now)), id)
         }

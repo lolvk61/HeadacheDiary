@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.headachediary.app.data.AppDatabase
 import com.headachediary.app.data.Backup
 import com.headachediary.app.data.HeadacheEntry
+import com.headachediary.app.data.PainFreeDay
 import com.headachediary.app.settings.AppSettings
+import com.headachediary.app.ui.toLocalDate
 import com.headachediary.app.weather.LocationHelper
 import com.headachediary.app.weather.WeatherOutcome
 import com.headachediary.app.weather.WeatherService
@@ -16,6 +18,7 @@ import com.headachediary.app.widget.PainWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,17 +32,32 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val entries: StateFlow<List<HeadacheEntry>> = dao.all()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Дни (число дней от 1970-01-01), которые пользователь отметил как «без боли». */
+    val painFreeDays: StateFlow<Set<Long>> = dao.painFreeDays()
+        .map { list -> list.map { it.day }.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
     /** Создаёт запись со временем "прямо сейчас" — вызывается по нажатию главной кнопки. */
     fun startNow(onCreated: (Long) -> Unit) = addAt(System.currentTimeMillis(), onCreated)
 
     fun addAt(time: Long, onCreated: (Long) -> Unit) {
         viewModelScope.launch {
+            // День с записью о боли не может быть отмечен как «без боли».
+            dao.unmarkPainFree(time.toLocalDate().toEpochDay())
             val id = dao.insert(HeadacheEntry(startTime = time))
             PainWidget.updateAll(context)
             onCreated(id)
             // Запись уже сохранена со временем; погода дописывается следом, если функция включена.
             WeatherService.attach(context, id)
         }
+    }
+
+    fun markPainFree(day: Long) {
+        viewModelScope.launch { dao.markPainFree(PainFreeDay(day)) }
+    }
+
+    fun unmarkPainFree(day: Long) {
+        viewModelScope.launch { dao.unmarkPainFree(day) }
     }
 
     /** Обновляет запомненное местоположение при запуске, пока приложение на экране и Android отдаёт координаты. */
@@ -82,7 +100,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val ok = withContext(Dispatchers.IO) {
                 runCatching {
-                    val json = Backup.toJson(dao.allOnce())
+                    val json = Backup.toJson(dao.allOnce(), dao.painFreeDaysOnce().map { it.day })
                     val stream = context.contentResolver.openOutputStream(uri, "wt") ?: error("No output stream")
                     stream.use { it.write(json.toByteArray(Charsets.UTF_8)) }
                 }.isSuccess
@@ -99,11 +117,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     val stream = context.contentResolver.openInputStream(uri) ?: error("No input stream")
                     val bytes = stream.use { it.readBytes() }
                     check(bytes.size <= MAX_BACKUP_BYTES) { "File is too large" }
-                    val parsed = Backup.parse(bytes.toString(Charsets.UTF_8))
+                    val data = Backup.parse(bytes.toString(Charsets.UTF_8))
                     val existing = dao.allOnce().map { it.startTime }.toSet()
-                    val fresh = parsed.filter { it.startTime !in existing }.distinctBy { it.startTime }
+                    val fresh = data.entries.filter { it.startTime !in existing }.distinctBy { it.startTime }
                     dao.insertAll(fresh)
-                    ImportResult(added = fresh.size, skipped = parsed.size - fresh.size)
+                    dao.markPainFreeAll(data.painFreeDays.map { PainFreeDay(it) })
+                    ImportResult(added = fresh.size, skipped = data.entries.size - fresh.size)
                 }.getOrNull()
             }
             PainWidget.updateAll(context)
